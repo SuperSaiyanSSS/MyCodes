@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -163,6 +164,16 @@ void changeLength2D(T** &x, int oldRows, int oldColumns, int newRows, int newCol
     x = newx;
 }
 
+//chapter1-15
+//1)
+//max: 2^{32} - 1 dollars and 99 cents.
+//min: - (2^{32} - 1) dollars and -99 cents.
+//2)
+//max: 2^{31} - 1 dollars and 99 cents.
+//min: - (2^{31} - 1) dollars and -99 cents.
+//3)
+//dollar 应小于等于 2^30-1
+
 template <class T>
 void permutation(T* list_, int start_, int end_){
     if(start_ == end_ ){
@@ -174,52 +185,166 @@ void permutation(T* list_, int start_, int end_){
     else{
         for(int i=start_;i<end_;i++){
             swap(list_[start_], list_[i]);
-            permutation(list_, i, end_);
+            permutation(list_, start_+1, end_);
             swap(list_[start_], list_[i]);
         }
     }
 }
 
-
-//chapter1-15
+//chapter1-20
 //1)
-//max: 2^{32} - 1 dollars and 99 cents.
-//min: - (2^{32} - 1) dollars and -99 cents.
-//2)
-//max: 2^{31} - 1 dollars and 99 cents.
-//min: - (2^{31} - 1) dollars and -99 cents.
+int Fibonacci(int n){
+    if(n==1){
+        return 1;
+    }
+    if(n==0)
+        return 0;
+    return Fibonacci(n-1)+Fibonacci(n-2);
+}
 //3)
-//dollar 应小于等于 2^30-1
+int Fibonacci2(int n){
+    int f1,f2,f3;
+    f1=0;
+    f2=1;
+    if(n==0)
+        return 0;
+    if(n==1)
+        return 1;
+    for(int i=0;i<n-1;i++){
+        f3 = f1+f2;
+        f1 = f2;
+        f2 = f3;
+    }
+    return f3;
+}
+
+//chapter1-21
+//1)
+//8 11
+//2)
+//基础部分：n为偶数时n/2 递归部分：n为奇数时f(3n+1)
+//证明：利用奇数i = 2j-1(j为自然数)即可
+//3)
+int f_chapter1_21_3(int n){
+    if(n%2){
+        return f_chapter1_21_3(3*n+1);
+    }
+    else{
+        return n/2;
+    }
+}
+//4)
+int f_chapter1_21_4(int n){
+    if(n%2){
+        return (3*n+1)/2;
+    }
+    else{
+        return n/2;
+    }
+}
+
+//chapter1-22
+//1)
+//4 4 16
+//2)
+//显然
+//3)
+int Ackermann(int i, int j){
+    if(i==1&&j>=1){
+        return pow(2,j);
+    }
+    else if(i>=2&&j==1){
+        return Ackermann(i-1,2);
+    }
+    else{
+        return Ackermann(i-1, Ackermann(i, j-1));
+    }
+}
+
+//chapter1-23
+//1)
+//10 14
+//2)
+//
+//3)
+int gcd(int x, int y){
+    if(x<y){
+        swap(x, y);
+    }
+    if(y==0){
+        return x;
+    }
+    return gcd(y, x%y);
+}
+
+//chapter1-24
+template <class T>
+bool f_chapter1_24(T* a, int a_size, T x){
+    if(a_size==0){
+        return false;
+    }
+    if(a[a_size-1]==x){
+        return true;
+    }
+    return f_chapter1_24(a, a_size-1, x);
+}
+
+//chapter1-25
+void subset_generation(int n, int now_pos, int* set_){
+    if(n==1){
+        cout<<"0,1"<<endl;
+    }
+    if(now_pos==n){
+        for(int i=0;i<n;i++){
+            cout<<set_[i];
+        }
+        cout<<endl;
+    }
+    else{
+        subset_generation(n, now_pos+1, set_);
+        set_[now_pos] = 1;
+        subset_generation(n, now_pos+1, set_);
+        set_[now_pos] = 0;
+    }
+}
 
 int main(){
-    try{
-        abc(3,-1,-1);
-    }
-    catch(int result){
-        if(result==2){
-            cout<<"a b c都为0，非法"<<endl;
-            return -1;
-        }
-        if(result==1){
-            cout<<"a b c都小于0，非法"<<endl;
-            return -1;
-        }
-    }
-    int **x;
-    int a = 2;
-    int **b;
-    b = new int*[3];
-    for(int i=0;i<3;i++){
-        b[i] = new int[5];
-    }
-    b[0][0]=b[1][1]=b[2][2]=5;
-    changeLength2D(b, 3, 5, 4, 6);
-    cout<<b[3][5]<<endl;
-    int* list_ = new int[5];
-    for(int i=0;i<5;i++){
-        list_[i] = i;
-    }
-    permutation(list_, 0, 5);
+//    try{
+//        abc(3,-1,-1);
+//    }
+//    catch(int result){
+//        if(result==2){
+//            cout<<"a b c都为0，非法"<<endl;
+//            return -1;
+//        }
+//        if(result==1){
+//            cout<<"a b c都小于0，非法"<<endl;
+//            return -1;
+//        }
+//    }
+//    int **x;
+//    int a = 2;
+//    int **b;
+//    b = new int*[3];
+//    for(int i=0;i<3;i++){
+//        b[i] = new int[5];
+//    }
+//    b[0][0]=b[1][1]=b[2][2]=5;
+//    changeLength2D(b, 3, 5, 4, 6);
+//    cout<<b[3][5]<<endl;
+//    cout<<Fibonacci(20)<<endl;
+//    cout<<f_chapter1_21_3(7)<<endl;
+//    cout<<Ackermann(2,2)<<endl;
+//    cout<<gcd(112,42)<<endl;
+//    int *a = new int[4];
+//    a[0]=2;
+//    a[1]=5;
+//    if(f_chapter1_24(a, 4, 3)){
+//        cout<<"ok"<<endl;
+//    }
+    int *b = new int[6];
+    b[0]=0;b[1]=0;b[2]=0;b[5]=0;
+    subset_generation(6,0,b);
     return 0;
 }
 
