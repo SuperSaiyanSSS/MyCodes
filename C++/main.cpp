@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 
@@ -305,6 +306,25 @@ void subset_generation(int n, int now_pos, int* set_){
         set_[now_pos] = 1;
         subset_generation(n, now_pos+1, set_);
         set_[now_pos] = 0;
+    }
+}
+
+
+//chapter1-26
+void int2str(const int& int_temp, string &string_temp){
+    stringstream stram;
+    stram<<int_temp;
+    string_temp = stram.str();
+}
+string graycode(int n){
+    if(n==1){
+        return "1";
+    }
+    else{
+        string string_n = "n";
+        int int_n = n;
+        int2str(int_n, string_n);
+        return graycode(n-1)+","+string_n+","+graycode(n-1);
     }
 }
 
