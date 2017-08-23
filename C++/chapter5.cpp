@@ -2,6 +2,7 @@
 #include <ctime>
 #include <cstdio>
 #include <vector>
+#include <cstdlib>
 
 using namespace std;
 
@@ -257,7 +258,7 @@ void arrayList<T>::circularShift(int q) {
 //}
 
 
-//chapter5-26
+//chapter5-25
 template <class T>
 void arrayList<T>::half() {
 //    int newSize = listSize/2;
@@ -291,40 +292,67 @@ void arrayList<T>::half() {
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
-    int a = 18;
-    arrayList<int> z(a,3);
-    cout<<z.size()<<endl;
-    cout<<z.capacity()<<endl;
-    for(int i=0;i<9;i++){
-        z.insert(i, i+100);
+    arrayList<int> list2(1,2);
+    arrayList<int> list3(1,2);
+    time_t start, end;
+    start = clock();
+    //最好
+    for(int i=0;i<100000;i++){
+        list2.insert(list2.size(), 1);
     }
-    cout<<z.size()<<endl;
-    cout<<z.capacity()<<endl;
-    z.trimToSize();
-    cout<<z.size()<<endl;
-    cout<<z.capacity()<<endl;
-//    clock_t s1, s2, e1, e2;
-//    double duration;
-//    int i=10000000;
-//    s1 = clock();
-//    while(i--){
-//        z.reverse();
+    end = clock();
+    cout<<"good "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+    //最坏
+    start = clock();
+    for(int i=0;i<100000;i++){
+        list2.insert(0, 1);
+    }
+    end = clock();
+    cout<<"bad "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+    //平均
+    for(int i=0;i<100000;i++){
+        list3.insert(list3.size(), 1);
+    }
+    start = clock();
+    for(int i=0;i<100000;i++){
+        list3.insert(rand()%100000, 1);
+    }
+    end = clock();
+    cout<<"average "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+//    int a = 18;
+//    arrayList<int> z(a,3);
+//    cout<<z.size()<<endl;
+//    cout<<z.capacity()<<endl;
+//    for(int i=0;i<9;i++){
+//        z.insert(i, i+100);
 //    }
-    for(int i=0;i<z.listSize;i++){
-        cout<<" "<<z.element[i];
-    }
-    cout<<endl;
-    z.circularShift(4);
-    cout<<"23"<<endl;
-    for(int i=0;i<z.listSize;i++){
-        cout<<" "<<z.element[i];
-    }
-    cout<<endl;
-    z.half();
-    for(int i=0;i<z.listSize;i++){
-        cout<<" "<<z.element[i];
-    }
-    cout<<endl;
+//    cout<<z.size()<<endl;
+//    cout<<z.capacity()<<endl;
+//    z.trimToSize();
+//    cout<<z.size()<<endl;
+//    cout<<z.capacity()<<endl;
+////    clock_t s1, s2, e1, e2;
+////    double duration;
+////    int i=10000000;
+////    s1 = clock();
+////    while(i--){
+////        z.reverse();
+////    }
+//    for(int i=0;i<z.listSize;i++){
+//        cout<<" "<<z.element[i];
+//    }
+//    cout<<endl;
+//    z.circularShift(4);
+//    cout<<"23"<<endl;
+//    for(int i=0;i<z.listSize;i++){
+//        cout<<" "<<z.element[i];
+//    }
+//    cout<<endl;
+//    z.half();
+//    for(int i=0;i<z.listSize;i++){
+//        cout<<" "<<z.element[i];
+//    }
+//    cout<<endl;
 //    arrayList<int>&r = z;
 //    e1 = clock();
 //    duration = (double)(e1-s1)/CLOCKS_PER_SEC;
@@ -340,4 +368,3 @@ int main() {
 //    z.reverse();
     return 0;
 }
-
