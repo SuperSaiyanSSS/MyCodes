@@ -7,6 +7,7 @@ using namespace std;
 template <class T>
 struct chainNode{
     T element;
+    string name;
     chainNode<T> *next;
 
     chainNode(){};
@@ -16,6 +17,11 @@ struct chainNode{
     chainNode(const T& element, chainNode<T>* next){
         this->element = element;
         this->next = next;
+    }
+    chainNode(const T& element, chainNode<T>* next, const string name){
+        this->element = element;
+        this->next = next;
+        this->name = name;
     }
 };
 
@@ -33,9 +39,11 @@ public:
     int indexOf(const T& theElement) const;
     void erase(int theIndex);
     void insert(int theIndex, const T& theElement);
+    void insert(int theIndex, const T& theElement, const string name);
     void output() const;
     void reverse();
     void circularShift(int i);
+    void binSort(int range);
 
 //protected:
     void checkIndex(int theIndex) const ;
@@ -163,6 +171,26 @@ void chain<T>::insert(int theIndex, const T &theElement) {
 }
 
 template <class T>
+void chain<T>::insert(int theIndex, const T &theElement, const string name) {
+    if(theIndex==0){
+        firstNode = new chainNode<T>(theElement, firstNode, name);
+    }
+    else{
+        int count_ = 0;
+        chainNode<T>* p = firstNode;
+        while(p!=NULL){
+            if(count_+1==theIndex){
+                p->next = new chainNode<T>(theElement, p->next, name);
+            }
+            count_++;
+            p = p->next;
+        }
+    }
+    listSize++;
+}
+
+
+template <class T>
 void chain<T>::output() const {
     chainNode<T>* p = firstNode;
     for(int i=0;i<listSize;i++){
@@ -275,37 +303,92 @@ public:
         output();
     }
 
+
 protected:
     chainNode<T>* headerNode;
     int listSize;
 };
 
+template <class T>
+void chain<T>::binSort(int range){
+    range++;
+    chainNode<T> **bottom = new chainNode<T>*[range];
+    chainNode<T> **top = new chainNode<T>*[range];
+    for(int i=0;i<range;i++){
+        bottom[i] = NULL;
+        top[i]=NULL;
+    }
+    for(;firstNode!=NULL;firstNode=firstNode->next){
+        if(bottom[firstNode->element]==NULL){
+            top[firstNode->element] = bottom[firstNode->element] = firstNode;
+        }
+        else{
+            top[firstNode->element]->next = firstNode;
+            top[firstNode->element] = firstNode;
+        }
+    }
+    bool firstFlag = true;
+    chainNode<T>* newFirst, *p;
+    for(int i=0;i<range;i++){
+        if(bottom[i]!=NULL){
+            if(firstFlag){
+                firstFlag = false;
+                newFirst = bottom[i];
+                p = top[i];
+            }
+            else{
+                p->next = bottom[i];
+                p = top[i];
+            }
+        }
+    }
+    if(p!=NULL){
+        p->next = NULL;
+    }
+    p = newFirst;
+    while(p!=NULL){
+        cout<<p->element<<":"<<p->name<<" -> ";
+        p = p->next;
+    }
+    cout<<endl;
+}
+
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
     srand((unsigned int)time(NULL));
-    chain<int>* list1 = new chain<int>(10);
-    time_t start, end;
-    start = clock();
-    //最好插入
-    for(int i=0;i<10000;i++){
-        list1->insert(0,1);
+//    chain<int>* list1 = new chain<int>(10);
+//    time_t start, end;
+//    start = clock();
+//    //最好插入
+//    for(int i=0;i<10000;i++){
+//        list1->insert(0,1);
+//    }
+//    end = clock();
+//    cout<<"good "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+//    //最坏插入
+//    start = clock();
+//    for(int i=0;i<10000;i++){
+//        list1->insert(list1->listSize, 1);
+//    }
+//    end = clock();
+//    cout<<"bad "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+//    //平均插入
+//    start = clock();
+//    for(int i=0;i<10000;i++){
+//        list1->insert(rand()%10000, 1);
+//    }
+//    end = clock();
+//    cout<<"average "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+    chain<int>* list2 = new chain<int>(10);
+    for(int i=0;i<9;i++){
+        list2->insert(0, 1, "ez");
     }
-    end = clock();
-    cout<<"good "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
-    //最坏插入
-    start = clock();
-    for(int i=0;i<10000;i++){
-        list1->insert(list1->listSize, 1);
-    }
-    end = clock();
-    cout<<"bad "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
-    //平均插入
-    start = clock();
-    for(int i=0;i<10000;i++){
-        list1->insert(rand()%10000, 1);
-    }
-    end = clock();
-    cout<<"average "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
+    list2->insert(list2->listSize, 3, "gl");
+    list2->insert(0, 4, "sd");
+    list2->insert(0, 3, "haha");
+    list2->binSort(4);
+
 
 //    circularListWithHeader<int>* h = new circularListWithHeader<int>();
 //    for(int i=0;i<100;i++){
