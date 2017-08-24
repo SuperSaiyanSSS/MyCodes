@@ -1,6 +1,9 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
+
+#define PI 3.14159
 
 using namespace std;
 
@@ -256,6 +259,173 @@ void chain<T>::circularShift(int i){
 }
 
 //chapter6-30
+class Point2D{
+public:
+    double x;
+    double y;
+    bool ni;
+    double cosTheta;
+    double realTheta;
+    bool relativeNi;
+    double relativeCosTheta;
+    double relativeTheta;
+    Point2D* right;
+    Point2D* left;
+    Point2D(){};
+    Point2D(double x, double y){
+        this->x = x;
+        this->y = y;
+    }
+};
+template <class T>
+class circularList{
+public:
+    Point2D* headerNode;
+    int listSize;
+    circularList(){
+//        headerNode = new Point2D();
+//        headerNode->right = headerNode;
+//        headerNode->left = headerNode;
+        listSize = 0;
+    }
+    void push_back(Point2D* newNode){
+        if(listSize==0){
+            headerNode = newNode;
+            headerNode->right = headerNode;
+            headerNode->left = headerNode;
+            listSize++;
+        }
+        else{
+            headerNode->left->right = newNode;
+            newNode->left = headerNode->left;
+            newNode->right = headerNode;
+            listSize++;
+        }
+    }
+    void erase(int number){
+        if(number<0){
+            throw "Cannot erase element which < 0";
+        }
+        if(listSize==0){
+            throw "Cannot erase null list";
+        }
+        if(number>listSize){
+            throw "Too large number to cover listSize";
+        }
+        if(number==0&&listSize>2){
+            headerNode->left->right = headerNode->right;
+            headerNode->right->left = headerNode->left;
+            Point2D* oldHeaderNode = headerNode;
+            headerNode = headerNode->right;
+            delete oldHeaderNode;
+            listSize--;
+        }
+        else if(number==0&&listSize==1){
+            delete headerNode;
+            listSize--;
+        }
+        else if(number==0&&listSize==2){
+            headerNode->right->left = NULL;
+            headerNode->right->right = NULL;
+            Point2D* oldHeaderNode = headerNode;
+            headerNode = headerNode->right;
+            delete oldHeaderNode;
+            listSize--;
+        }
+        else if(listSize==2){
+            delete headerNode->right;
+            headerNode->left = headerNode->right = NULL;
+            listSize--;
+        }
+        else if(listSize>2){
+            Point2D* p = headerNode;
+            for(int i=0;i<number;i++){
+                p = p->right;
+            }
+            p->left->right = p->right;
+            p->right->left = p->left;
+            delete p;
+            listSize--;
+        }
+    }
+    void output(){
+        Point2D* p = headerNode;
+        for(int i=0;i<listSize;i++){
+            cout<<" ("<<p->x<<","<<p->y<<") ";
+            p = p->right;
+        }
+        cout<<endl;
+    }
+    void insert(int number, Point2D* newNode){
+        if(listSize<number){
+            throw "the number is too large!";
+        }
+        if(number==0&&listSize==0){
+            headerNode = newNode;
+            headerNode->left = newNode;
+            headerNode->right = newNode;
+            listSize++;
+        }
+        else if(number==0&&listSize==1){
+            headerNode->left = newNode;
+            headerNode->right = newNode;
+            newNode->right = headerNode;
+            newNode->left = headerNode;
+            headerNode = newNode;
+            cout<<headerNode->x<<endl;
+            cout<<headerNode->right->x<<endl;
+            listSize++;
+        }
+        else if(number==0&&listSize>1){
+            newNode->left = headerNode->left;
+            newNode->right = headerNode;
+            headerNode->left->right = newNode;
+            headerNode->left = newNode;
+            headerNode = newNode;
+            listSize++;
+        }
+        else if(number==1&&listSize==1){
+            newNode->left = headerNode;
+            newNode->right = headerNode;
+            headerNode->left = newNode;
+            headerNode->right = newNode;
+            listSize++;
+        }
+        else if(number==listSize){
+            Point2D* p = headerNode->left;
+            newNode->left = p;
+            p->right = newNode;
+            headerNode->left = newNode;
+            newNode->right = headerNode;
+            listSize++;
+        }
+        else{
+            Point2D* p = headerNode;
+            for(int i=0;i<number;i++){
+                p = p->right;
+            }
+            p->left->right = newNode;
+            newNode->left = p->left;
+            newNode->right = p;
+            p->left = newNode;
+            listSize++;
+        }
+
+    }
+    int indexOf(Point2D* targetNode){
+        Point2D* p = headerNode;
+        for(int i=0;i<listSize;i++){
+            if(p->x==targetNode->x&&p->y==targetNode->y){
+                return i;
+            }
+            p = p->right;
+        }
+        return -1;
+    }
+
+};
+
+//chapter6-39
 template <class T>
 class circularListWithHeader{
 public:
@@ -356,10 +526,12 @@ void chain<T>::binSort(int range){
 
 //chapter6-67
 //1
-typedef struct Point2D{
-    double x;
-    double y;
-};
+//typedef struct Point2D{
+//    double x;
+//    double y;
+//    Point2D* right;
+//    Point2D* left;
+//};
 Point2D* getPointInTriangle(const Point2D& u, const Point2D& v, const Point2D& w){
     Point2D* pointInTriangle = new Point2D();
     pointInTriangle->x = (u.x+v.x+w.x)/3.0;
@@ -381,11 +553,26 @@ int getPointNumberOfMinY(Point2D* listOfPoint, int numberOfPoint){
     }
     return minP;
 }
+int getPointNumberOfMaxY(Point2D* listOfPoint, int numberOfPoint){
+    if(numberOfPoint<2){
+        throw "Cannot < 2";
+    }
+    double maxY = listOfPoint[0].y;
+    int maxP = 0;
+    for(int i=0;i<numberOfPoint;i++){
+        if(listOfPoint[i].y>maxY){
+            maxY = listOfPoint[i].y;
+            maxP = i;
+        }
+    }
+    return maxP;
+}
+
 int checkIfCollinear(Point2D* listOfPoint, int numberOfPoint){
     if(numberOfPoint==2){
         return -1;
     }
-    double k1 = (listOfPoint[1].y-listOfPoint[0].y)/(listOfPoint[1].x-listOfPoint[0].x)
+    double k1 = (listOfPoint[1].y-listOfPoint[0].y)/(listOfPoint[1].x-listOfPoint[0].x);
     for(int i=2;i<numberOfPoint;i++){
         if((listOfPoint[i].y-listOfPoint[0].y)/(listOfPoint[i].x-listOfPoint[0].x)!=k1){
             return i;
@@ -393,11 +580,136 @@ int checkIfCollinear(Point2D* listOfPoint, int numberOfPoint){
     }
     return -1;
 }
+
 Point2D* getX(Point2D* listOfPoint, int numberOfPoint){
     int targetPointNumber = checkIfCollinear(listOfPoint, numberOfPoint);
+    if(targetPointNumber==-1){
+        return nullptr;
+    }
     return getPointInTriangle(listOfPoint[0], listOfPoint[1], listOfPoint[targetPointNumber]);
 }
-//TODO:3
+//3
+double multiplicationCross(Point2D* X, Point2D* Y){
+    return X->x*Y->y - X->y*Y->x;
+}
+
+Point2D* transToVector(Point2D* X, Point2D* Y){
+    Point2D* vector = new Point2D(Y->x - X->x, Y->y - X->y);
+    return vector;
+}
+
+double getCosTheta(Point2D* X, Point2D* Y){
+    double XLength = sqrt((X->x)*(X->x)+(X->y)*(X->y));
+    double YLength = sqrt((Y->x)*(Y->x)+(Y->y)*(Y->y));
+    double dotProduct = X->x*Y->x + X->y*Y->y;
+    return dotProduct/abs(XLength*YLength);
+}
+
+double getRelativeTheta(Point2D* x, Point2D* rx, Point2D* rrx){
+    Point2D* vectorX1 = new Point2D(x->x - rx->x, x->y - rx->y);
+    Point2D* vectorX2 = new Point2D(rrx->x - rx->x, rrx->y - rx->y);
+    rx->relativeNi = multiplicationCross(vectorX1, vectorX2)>0;
+    rx->relativeCosTheta = getCosTheta(vectorX1, vectorX2);
+    if(rx->relativeNi){
+        rx->relativeTheta = acos(rx->relativeCosTheta);
+    }
+    else{
+        rx->relativeCosTheta = PI + PI - acos(rx->relativeCosTheta);
+    }
+    return rx->relativeCosTheta;
+}
+
+circularList<int>* getConvexHull(Point2D* listOfPoint, int numberOfPoint){
+    //退化情况。如果S的点少于3个，则返回S
+    if(numberOfPoint<3){
+        circularList<int>* S = new circularList<int>();
+        for(int i=0;i<numberOfPoint;i++){
+            S->insert(i, &listOfPoint[i]);
+        }
+        return S;
+    }
+    Point2D* X = getX(listOfPoint, numberOfPoint);
+    //如果S所有点共线，则返回最远的两个端点
+    if(X == nullptr){
+        circularList<int> *S = new circularList<int>();
+        S->insert(0, &listOfPoint[getPointNumberOfMinY(listOfPoint, numberOfPoint)]);
+        S->insert(1, &listOfPoint[getPointNumberOfMaxY(listOfPoint, numberOfPoint)]);
+        return S;
+    }
+    //按极角排序
+    //先根据向量叉乘x1y2-x2y1 判断是逆时针夹角还是顺时针夹角
+    //若叉乘结果为正 则为逆时针夹角 否则为顺时针，需要做相应变换
+    Point2D* XVector = transToVector(X, new Point2D(X->x, X->y-1));
+    for(int i=0;i<numberOfPoint;i++){
+        Point2D* vector = transToVector(X, &listOfPoint[i]);
+        listOfPoint[i].ni = multiplicationCross(XVector, vector)>0;
+        listOfPoint[i].cosTheta = getCosTheta(XVector, vector);
+        if(listOfPoint[i].ni){
+            listOfPoint[i].realTheta = acos(listOfPoint[i].cosTheta);
+        }
+        else{
+            listOfPoint[i].realTheta = PI + PI - acos(listOfPoint[i].cosTheta);
+        }
+    }
+    //后冒泡排序
+    for(int i=0;i<numberOfPoint;i++){
+        for(int j=i+1;j<numberOfPoint;j++){
+            if(listOfPoint[i].realTheta>listOfPoint[j].realTheta){
+                swap(listOfPoint[i], listOfPoint[j]);
+            }
+        }
+    }
+//    for(int i=0;i<numberOfPoint;i++){
+//        cout<<listOfPoint[i].realTheta<<" "<<listOfPoint[i].x<<endl;
+//    }
+    circularList<int>* targetList = new circularList<int>();
+    //插入至双向链表
+    for(int i=0;i<numberOfPoint;i++){
+        targetList->insert(i, &listOfPoint[i]);
+    }
+    //删除非极点的点
+    int minp = getPointNumberOfMinY(listOfPoint, numberOfPoint);
+    Point2D* p = &listOfPoint[minp];
+    Point2D* x, *rx;
+    //自己尝试的正确解法
+    for(x=p, rx=x->right;p!=rx;){
+        Point2D* rrx = rx->right;
+        if(getRelativeTheta(x, rx, rrx)<=PI/2){
+            targetList->erase(targetList->indexOf(rx));
+            x = rrx;
+            rx = x->right;
+        }
+        else{
+            x = rx;
+            rx = rrx;
+        }
+    }
+//    //书本里提到的解法，但对(0,0)  (4,4)  (-1,6)  (-2,3)  (-5,0) (1,2)
+//    //会多出(-2,3)导致错误
+//    for(x=p, rx = x->right;p!=rx;){
+//        Point2D* rrx = rx->right;
+//        if(getRelativeTheta(x, rx, rrx)<=PI/2){
+//            targetList->erase(targetList->indexOf(rx));
+//            rx = x;
+//            x = rx->left;
+//        }
+//        else{
+//            x = rx;
+//            rx = rrx;
+//        }
+//    }
+    Point2D* p1;
+    p1 = targetList->headerNode;
+    cout<<"the extreme points of S are ";
+    for(int i=0;i<targetList->listSize;i++){
+        cout<<" ("<<p1->x<<","<<p1->y<<") ";
+        p1 = p1->right;
+    }
+    cout<<endl;
+    return targetList;
+
+}
+
 
 
 
@@ -435,6 +747,51 @@ int main() {
     list2->insert(0, 4, "sd");
     list2->insert(0, 3, "haha");
     list2->binSort(4);
+
+    circularList<int>* list3 = new circularList<int>();
+    cout<<list3->listSize<<endl;
+    Point2D* p1 = new Point2D(1,2);
+    Point2D* p2 = new Point2D(3.3,5.5);
+    Point2D* p3 = new Point2D(8,8);
+    list3->insert(0,p1);
+    cout<<list3->listSize<<endl;
+    list3->output();
+    list3->insert(0,p2);
+    list3->output();
+    list3->insert(0,p3);
+    list3->output();
+    list3->insert(3, new Point2D(5,5));
+    list3->insert(0, new Point2D(5,7));
+    list3->output();
+    cout<<list3->listSize<<endl;
+    cout<<acos(-1)<<endl;
+    cout<<PI/2<<endl;
+    int a[5] = {2,4,6,1,3};
+    for(int i=0;i<5;i++){
+        for(int j=i+1;j<5;j++){
+            if(a[i]>a[j]){
+                swap(a[i], a[j]);
+            }
+        }
+    }
+    for(int i=0;i<5;i++){
+        cout<<a[i]<<endl;
+    }
+    cout<<endl;
+    Point2D* aa = new Point2D(-5,5);
+    Point2D* bb = new Point2D(5,5);
+    Point2D* cc = new Point2D(-5,0);
+    Point2D* dd = new Point2D(5,0);
+    Point2D* ee = new Point2D(-2, 3);
+    Point2D* ff = new Point2D(100, 2);
+    Point2D* ss = new Point2D[6];
+    ss[0] = *aa;
+    ss[1] = *bb;
+    ss[2] = *cc;
+    ss[3] = *dd;
+    ss[4] = *ee;
+    ss[5] = *ff;
+    getConvexHull(ss, 6);
 
 
 //    circularListWithHeader<int>* h = new circularListWithHeader<int>();
