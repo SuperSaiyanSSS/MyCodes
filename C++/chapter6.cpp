@@ -309,6 +309,7 @@ protected:
     int listSize;
 };
 
+//bin sort
 template <class T>
 void chain<T>::binSort(int range){
     range++;
@@ -352,6 +353,52 @@ void chain<T>::binSort(int range){
     }
     cout<<endl;
 }
+
+//chapter6-67
+//1
+typedef struct Point2D{
+    double x;
+    double y;
+};
+Point2D* getPointInTriangle(const Point2D& u, const Point2D& v, const Point2D& w){
+    Point2D* pointInTriangle = new Point2D();
+    pointInTriangle->x = (u.x+v.x+w.x)/3.0;
+    pointInTriangle->y = (u.y+v.y+w.y)/3.0;
+    return pointInTriangle;
+}
+//2
+int getPointNumberOfMinY(Point2D* listOfPoint, int numberOfPoint){
+    if(numberOfPoint<2){
+        throw "Cannot < 2";
+    }
+    double minY = listOfPoint[0].y;
+    int minP = 0;
+    for(int i=0;i<numberOfPoint;i++){
+        if(listOfPoint[i].y<minY){
+            minY = listOfPoint[i].y;
+            minP = i;
+        }
+    }
+    return minP;
+}
+int checkIfCollinear(Point2D* listOfPoint, int numberOfPoint){
+    if(numberOfPoint==2){
+        return -1;
+    }
+    double k1 = (listOfPoint[1].y-listOfPoint[0].y)/(listOfPoint[1].x-listOfPoint[0].x)
+    for(int i=2;i<numberOfPoint;i++){
+        if((listOfPoint[i].y-listOfPoint[0].y)/(listOfPoint[i].x-listOfPoint[0].x)!=k1){
+            return i;
+        }
+    }
+    return -1;
+}
+Point2D* getX(Point2D* listOfPoint, int numberOfPoint){
+    int targetPointNumber = checkIfCollinear(listOfPoint, numberOfPoint);
+    return getPointInTriangle(listOfPoint[0], listOfPoint[1], listOfPoint[targetPointNumber]);
+}
+//TODO:3
+
 
 
 int main() {
