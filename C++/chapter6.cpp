@@ -47,6 +47,8 @@ public:
     void reverse();
     void circularShift(int i);
     void binSort(int range);
+    void radixSort(int range, int c);
+    int getRadix(int x, int r, int count);
 
 //protected:
     void checkIndex(int theIndex) const ;
@@ -524,6 +526,75 @@ void chain<T>::binSort(int range){
     cout<<endl;
 }
 
+//chapter6-65
+//cmath中的pow函数有很大误差
+int powKai(int x, int n){
+    int result = 1;
+    while(n--){
+        result = x*result;
+    }
+    return result;
+}
+
+template <class T>
+int chain<T>::getRadix(int x, int r, int count) {
+//    cout<<x<<endl;
+//    cout<<pow(r, (double)count)<<endl;
+//    cout<<(int)pow(r, (double)(count-1))<<endl;
+//    cout<<x%(int)pow(r, (double)count)/(int)pow(r, (double)(count-1))<<endl;
+    return (x%(int)powKai(r, count)/(int)powKai(r, (count-1)));
+}
+
+template <class T>
+void chain<T>::radixSort(int range, int c){
+    range++;
+    int count =  (int)(log(range)/log(c));
+    for(int j=1;j<=count+1;j++)
+    {
+        chainNode<T> **bottom = new chainNode<T> *[c+1];
+        chainNode<T> **top = new chainNode<T> *[c+1];
+        for (int i = 0; i < c+1; i++) {
+            bottom[i] = NULL;
+            top[i] = NULL;
+        }
+        for (; firstNode != NULL; firstNode = firstNode->next) {
+            cout<<"now "<<firstNode->element<<"is changed to "<<getRadix(firstNode->element, c, j)<<endl;
+            if (bottom[getRadix(firstNode->element, c, j)] == NULL) {
+                top[getRadix(firstNode->element, c, j)] = bottom[getRadix(firstNode->element, c, j)] = firstNode;
+            } else {
+                top[getRadix(firstNode->element, c, j)]->next = firstNode;
+                top[getRadix(firstNode->element, c, j)] = firstNode;
+            }
+        }
+        bool firstFlag = true;
+        chainNode<T> *newFirst, *p;
+        for (int i = 0; i < c+1; i++) {
+            if (bottom[i] != NULL) {
+                if (firstFlag) {
+                    firstFlag = false;
+                    newFirst = bottom[i];
+                    p = top[i];
+                } else {
+                    p->next = bottom[i];
+                    p = top[i];
+                }
+            }
+        }
+        if (p != NULL) {
+            p->next = NULL;
+        }
+        p = newFirst;
+        while (p != NULL) {
+            cout << p->element << ":" << p->name << " -> ";
+            p = p->next;
+        }
+        firstNode = newFirst;
+        cout << endl;
+    }
+}
+
+
+
 //chapter6-67
 //1
 //typedef struct Point2D{
@@ -778,13 +849,21 @@ int main() {
 //    cout<<"average "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
 //    chain<int>* list2 = new chain<int>(10);
 //    for(int i=0;i<9;i++){
-//        list2->insert(0, 1, "ez");
+//        list2->insert(0, i+1, "ez");
 //    }
 //    list2->insert(list2->listSize, 3, "gl");
 //    list2->insert(0, 4, "sd");
 //    list2->insert(0, 3, "haha");
-//    list2->binSort(4);
+//    list2->binSort(10);
 //
+    //chapter6-65
+    chain<int>* list5 = new chain<int>(10);
+    for(int i=0;i<10000;i++){
+        list5->insert(0, i+1, "name");
+    }
+    list5->radixSort(10000, 100);
+    cout<<list5->getRadix(99, 10, 2)<<" jishu"<<endl;
+ //   list5->binSort(100);
 //    circularList<int>* list3 = new circularList<int>();
 //    cout<<list3->listSize<<endl;
 //    Point2D* p1 = new Point2D(1,2);
@@ -847,6 +926,8 @@ int main() {
         cout<<find(i)<<"->";
     }
     cout<<endl;
+
+
 //    circularListWithHeader<int>* h = new circularListWithHeader<int>();
 //    for(int i=0;i<100;i++){
 //        h->push_back(i+100);
