@@ -710,7 +710,44 @@ circularList<int>* getConvexHull(Point2D* listOfPoint, int numberOfPoint){
 
 }
 
+//chapter6-73
+typedef struct equiveNode{
+    int equiveClass;
+    int next;
+    int size;
+};
 
+equiveNode* nodeArray;
+
+void initialize(int numberOfElements){
+    nodeArray = new equiveNode[numberOfElements+1];
+    for(int i=1;i<numberOfElements+1;i++){
+        nodeArray[i].equiveClass = i;
+        nodeArray[i].next = NULL;
+        nodeArray[i].size = 1;
+    }
+}
+
+void unite(int classA, int classB){
+    if(nodeArray[classA].size>nodeArray[classB].size) {
+        swap(classA, classB);
+    }
+    int i = classA;
+    nodeArray[i].equiveClass = classB;
+    while(nodeArray[i].next!=NULL){
+        nodeArray[i].equiveClass = classB;
+        i = nodeArray[i].next;
+    }
+    nodeArray[i].equiveClass = classB;
+    nodeArray[i].next = nodeArray[classB].next;
+    nodeArray[classB].next = classA;
+    nodeArray[classB].size += nodeArray[classA].size;
+    nodeArray[classA].size = 0;
+}
+
+int find(int theElement){
+    return nodeArray[theElement].equiveClass;
+}
 
 
 int main() {
@@ -739,61 +776,77 @@ int main() {
 //    }
 //    end = clock();
 //    cout<<"average "<<((double)(end-start))/CLOCKS_PER_SEC<<endl;
-    chain<int>* list2 = new chain<int>(10);
-    for(int i=0;i<9;i++){
-        list2->insert(0, 1, "ez");
-    }
-    list2->insert(list2->listSize, 3, "gl");
-    list2->insert(0, 4, "sd");
-    list2->insert(0, 3, "haha");
-    list2->binSort(4);
+//    chain<int>* list2 = new chain<int>(10);
+//    for(int i=0;i<9;i++){
+//        list2->insert(0, 1, "ez");
+//    }
+//    list2->insert(list2->listSize, 3, "gl");
+//    list2->insert(0, 4, "sd");
+//    list2->insert(0, 3, "haha");
+//    list2->binSort(4);
+//
+//    circularList<int>* list3 = new circularList<int>();
+//    cout<<list3->listSize<<endl;
+//    Point2D* p1 = new Point2D(1,2);
+//    Point2D* p2 = new Point2D(3.3,5.5);
+//    Point2D* p3 = new Point2D(8,8);
+//    list3->insert(0,p1);
+//    cout<<list3->listSize<<endl;
+//    list3->output();
+//    list3->insert(0,p2);
+//    list3->output();
+//    list3->insert(0,p3);
+//    list3->output();
+//    list3->insert(3, new Point2D(5,5));
+//    list3->insert(0, new Point2D(5,7));
+//    list3->output();
+//    cout<<list3->listSize<<endl;
+//    cout<<acos(-1)<<endl;
+//    cout<<PI/2<<endl;
+//    int a[5] = {2,4,6,1,3};
+//    for(int i=0;i<5;i++){
+//        for(int j=i+1;j<5;j++){
+//            if(a[i]>a[j]){
+//                swap(a[i], a[j]);
+//            }
+//        }
+//    }
+//    for(int i=0;i<5;i++){
+//        cout<<a[i]<<endl;
+//    }
+//    cout<<endl;
+//    Point2D* aa = new Point2D(-5,5);
+//    Point2D* bb = new Point2D(5,5);
+//    Point2D* cc = new Point2D(-5,0);
+//    Point2D* dd = new Point2D(5,0);
+//    Point2D* ee = new Point2D(-2, 3);
+//    Point2D* ff = new Point2D(100, 2);
+//    Point2D* ss = new Point2D[6];
+//    ss[0] = *aa;
+//    ss[1] = *bb;
+//    ss[2] = *cc;
+//    ss[3] = *dd;
+//    ss[4] = *ee;
+//    ss[5] = *ff;
+//    getConvexHull(ss, 6);
 
-    circularList<int>* list3 = new circularList<int>();
-    cout<<list3->listSize<<endl;
-    Point2D* p1 = new Point2D(1,2);
-    Point2D* p2 = new Point2D(3.3,5.5);
-    Point2D* p3 = new Point2D(8,8);
-    list3->insert(0,p1);
-    cout<<list3->listSize<<endl;
-    list3->output();
-    list3->insert(0,p2);
-    list3->output();
-    list3->insert(0,p3);
-    list3->output();
-    list3->insert(3, new Point2D(5,5));
-    list3->insert(0, new Point2D(5,7));
-    list3->output();
-    cout<<list3->listSize<<endl;
-    cout<<acos(-1)<<endl;
-    cout<<PI/2<<endl;
-    int a[5] = {2,4,6,1,3};
-    for(int i=0;i<5;i++){
-        for(int j=i+1;j<5;j++){
-            if(a[i]>a[j]){
-                swap(a[i], a[j]);
-            }
-        }
-    }
-    for(int i=0;i<5;i++){
-        cout<<a[i]<<endl;
+    initialize(14);
+    unite(find(1), find(11));
+    unite(find(7), find(11));
+    unite(find(2), find(12));
+    unite(find(12), find(8));
+    unite(find(11), find(12));
+    unite(find(3), find(13));
+    unite(find(4), find(13));
+    unite(find(13), find(14));
+    unite(find(14), find(9));
+    unite(find(5), find(14));
+    unite(find(6), find(10));
+
+    for(int i=1;i<=14;i++){
+        cout<<find(i)<<"->";
     }
     cout<<endl;
-    Point2D* aa = new Point2D(-5,5);
-    Point2D* bb = new Point2D(5,5);
-    Point2D* cc = new Point2D(-5,0);
-    Point2D* dd = new Point2D(5,0);
-    Point2D* ee = new Point2D(-2, 3);
-    Point2D* ff = new Point2D(100, 2);
-    Point2D* ss = new Point2D[6];
-    ss[0] = *aa;
-    ss[1] = *bb;
-    ss[2] = *cc;
-    ss[3] = *dd;
-    ss[4] = *ee;
-    ss[5] = *ff;
-    getConvexHull(ss, 6);
-
-
 //    circularListWithHeader<int>* h = new circularListWithHeader<int>();
 //    for(int i=0;i<100;i++){
 //        h->push_back(i+100);
