@@ -185,10 +185,10 @@ void printMatchedParis(string expr){
     }
 }
 
-//chapter7-15
+//chapter8-15
 //用一个int型的数即可 若减到负数则不匹配。若最后是0则匹配
 
-//chapter7-17
+//chapter8-17
 void threeKindOfBrackets(string expr){
     linkedStack<int>* saveChars = new linkedStack<int>();
     int stringSize = expr.size();
@@ -239,15 +239,21 @@ void threeKindOfBrackets(string expr){
 
 };
 
-//chapter7-22
+//chapter8-22
 //由于没有大碟小碟之分，所以借助3塔直接两次倒置即可，移动2n-1次
 
-//chapter7-23
+//chapter8-23
 //思路：若有n-1个中转塔，则移动时，只移动最上面的那一个碟子到最后一个中转塔，移动1次;
 //下面的分散到每个中转塔加1个目标塔上，移动n-1次（最下面的那个碟子移动到目标塔）;
 //然后按大小顺序，除了最大的那个碟子，逐个移动到目标塔上，移动n-1次;
 //总共移动2n-1次;
 //若有小于n-1个中转塔，假设有n-5个，则移动时，将最上面的5个碟子移动到最后一个中转塔（递归实现）,然后仿照之前做的即可
+
+//chapter8-29
+//思路：设置一个数组a，下标1~n对应着每个关系中的第一个元素（较小的元素，如（1，3）则是1）,初始值为0。
+//当有新元素i进栈时，检测a[reflex[i]]是否为1，如果为1且栈顶不为reflex[i]，则返回不能布线
+//如果为1且栈顶为reflex[i]，则出栈，继续
+//如果为0，则置1，进栈
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
