@@ -2,125 +2,6 @@
 #include <queue>
 
 using namespace std;
-//
-//template <class T>
-//struct binaryTreeNode
-//{
-//    T element;
-//    binaryTreeNode<T> *leftChild,
-//            *rightChild;
-//
-//    binaryTreeNode() {leftChild = rightChild = NULL;}
-//    binaryTreeNode(const T& theElement):element(theElement)
-//    {
-//        leftChild = rightChild = NULL;
-//    }
-//    binaryTreeNode(const T& theElement,
-//                   binaryTreeNode *theLeftChild,
-//                   binaryTreeNode *theRightChild)
-//            :element(theElement)
-//    {
-//        leftChild = theLeftChild;
-//        rightChild = theRightChild;
-//    }
-//};
-//
-//template<class E>
-//class linkedBinaryTree
-//{
-//public:
-//    linkedBinaryTree()
-//    {
-//        root = NULL;
-//        treeSize = 0;
-//    }
-//    typedef void (*visitfun)(binaryTreeNode<E>*);
-//
-//    bool empty() const
-//    {
-//        return treeSize == 0;
-//    }
-//    int size() const
-//    {
-//        return treeSize;
-//    }
-//
-//    void makeTree(const E& element,
-//                  linkedBinaryTree<E>&, linkedBinaryTree<E>&);
-//
-//    void preOrder(void(*theVisit)(binaryTreeNode<E>*))
-//    {
-//        visit = theVisit;
-//        preOrder(root);
-//    }
-//
-//    void preOrderOutput()
-//    {
-//        preOrder(output);
-//        cout << endl;
-//    }
-//
-//
-//protected:
-//    binaryTreeNode<E> *root;                // pointer to root
-//    int treeSize;                           // number of nodes in tree
-//
-//    static void (*visit)(binaryTreeNode<E>*);      // visit function
-//    static void preOrder(binaryTreeNode<E> *t);
-//    static void output(binaryTreeNode<E> *t)
-//    {
-//        cout << t->element << " ";
-//    }
-//
-//};
-////void (*linkedBinaryTree<int>::visit)(binaryTreeNode<int>*);
-//
-//template<class E>
-//void linkedBinaryTree<E>::makeTree(const E& element,
-//                                   linkedBinaryTree<E>& left, linkedBinaryTree<E>& right)
-//{
-//    // Combine left, right, and element to make new tree.
-//    // left, right, and this must be different trees.
-//    // create combined tree
-//    root = new binaryTreeNode<E> (element, left.root, right.root);
-//    treeSize = left.treeSize + right.treeSize + 1;
-//
-//    // deny access from trees left and right
-//    left.root = right.root = NULL;
-//    left.treeSize = right.treeSize = 0;
-//}
-//
-//
-//template<class E>
-//void linkedBinaryTree<E>::preOrder(binaryTreeNode<E> *t)
-//{
-//    // Previous order traversal.
-//    if (t != NULL)
-//    {
-//        linkedBinaryTree::visit(t);
-//        preOrder(t->leftChild);
-//        preOrder(t->rightChild);
-//    }
-//}
-//template<class E>
-//typename linkedBinaryTree<E>::visitfun  linkedBinaryTree<E>::visit = nullptr;
-
-//int main(void)
-//{
-//    linkedBinaryTree<int> a,x,y,z;
-//    y.makeTree(1,a,a);
-//    z.makeTree(2,a,a);
-//    x.makeTree(3,y,z);
-//    y.makeTree(4,x,a);
-//    cout << "Number of nodes = ";
-//    cout << y.size() << endl;
-//
-//    cout << "Preorder sequence is ";
-//    y.preOrderOutput();
-//
-//    return 0;
-//}
-
 
 template <class T>
 class binaryTreeNode{
@@ -201,6 +82,8 @@ public:
         preOrder(output);
         cout<<endl;
     }
+
+    binaryTreeNode<E>* makeTreeByPreOrder(binaryTreeNode<E>* t);
 //private:
     binaryTreeNode<E>* root;
     int treeSize;
@@ -213,6 +96,7 @@ public:
     static void output(binaryTreeNode<E>* t){
         if(t==NULL){
             cout<<"ha"<<endl;
+            return;
         }
         cout<<t->element<<' ';
         cout<<"derftg"<<endl;
@@ -223,6 +107,8 @@ public:
 
 template <class E>
 typename linkedBinaryTree<E>::visitfun linkedBinaryTree<E>::visit = nullptr;
+
+
 
 template <class E>
 void linkedBinaryTree<E>::preOrder(binaryTreeNode<E> *t) {
@@ -279,19 +165,24 @@ int linkedBinaryTree<E>::height(binaryTreeNode<E> *t) const {
     return h1>h2?++h1:++h2;
 }
 
-template <class F>
-class haha{
-public:
-    int element;
-    haha(){}
-    haha(const F& e){
-        element = e;
-    }
-    haha(int e){
-        element = e;
-    }
 
-};
+template <class E>
+binaryTreeNode<E>* linkedBinaryTree<E>::makeTreeByPreOrder(binaryTreeNode<E>* t) {
+    cout<<"please input the elements of the binary tree by pre-order!"<<endl;
+    string newInput;
+    cin>>newInput;
+    if(newInput!="#"){
+        t = new binaryTreeNode<E>();
+        t->element = newInput;
+        t->leftChild = makeTreeByPreOrder(t->leftChild);
+        t->rightChild = makeTreeByPreOrder(t->rightChild);
+    }
+    else{
+        return NULL;
+    }
+    return t;
+}
+
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
@@ -301,6 +192,10 @@ int main() {
     a->root = anode;
 // 0   a->visit = a->output;
     cout<<anode->element<<endl;
-    a->preOrderOutput();
+    linkedBinaryTree<string>* b = new linkedBinaryTree<string>();
+    b->root = b->makeTreeByPreOrder(b->root);
+    b->preOrderOutput();
+    cout<<b->root->element<<endl;
+    cout<<"333"<<endl;
     return 0;
 }
