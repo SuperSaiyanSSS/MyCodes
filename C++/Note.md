@@ -161,4 +161,18 @@ x%r/1, (x%r^2)/r, (x%r^3)/r^2 。。。。
 
 ### typedef 与 typename 的用法
 ### 函数指针的声明/定义 
+### C++中静态变量需要显式初始化
+对于int等类型，需要在类外声明，如```template <typename T> int linkedBinaryTree<T>::asize;```
 
+对于函数指针等类型，如    ```static void (*visit) (binaryTreeNode<E>*);```
+
+先 
+```
+typedef void (*visitfun)(binaryTreeNode<E>*);
+```
+
+然后
+```
+template <class E>
+typename linkedBinaryTree<E>::visitfun linkedBinaryTree<E>::visit = nullptr;
+```
