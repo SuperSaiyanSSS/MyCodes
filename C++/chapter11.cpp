@@ -4,6 +4,30 @@
 
 using namespace std;
 
+//chapter11-15
+//层次 a be cfh dg
+//后序 dcbgfhea
+
+//chapter11-16
+//层次 a b c dg eh fij k l
+//后序 fedilkjhgba
+
+//chapter11-17
+//层次 h eg adf c b
+//前序 headcbgf
+
+//chapter11-19
+//1
+//层次 a be cfh dg
+//中序 bcdagfeh
+//2
+//层次 a be cfh dg
+//中序 dcbagfeh
+
+
+
+
+
 template <class T>
 class binaryTreeNode{
 public:
@@ -90,17 +114,20 @@ public:
         preOrder(output);
         cout<<endl;
     }
+    void inOrderOutput(){
+        inOrder(output);
+        cout<<endl;
+    }
+    void postOrderOutput(){
+        postOrder(output);
+        cout<<endl;
+    }
 
     binaryTreeNode<E>* makeTreeByPreOrder(binaryTreeNode<E>* t);
 
     void makeTreeByPreOrder2(binaryTreeNode<E> **t);
 
     binaryTreeNode<E>* copyBinaryTreeByPreOrder(binaryTreeNode<E> *t);
-
-    void postOrderOutput(){
-        postOrder(output);
-        cout<<endl;
-    }
 
     binaryTreeNode<E>* copyBinaryTreeByPostOrder(binaryTreeNode<E> *t);
 
@@ -125,9 +152,26 @@ public:
         inOrder2(output);
         cout<<endl;
     }
+    void preOrder2Output(){
+        preOrder2(output);
+        cout<<endl;
+    }
+    void postOrder2Output(){
+        postOrder2(output);
+        cout<<endl;
+    }
+
     void inOrder2(void(*theVisit)(binaryTreeNode<E>* t)){
         visit = theVisit;
         inOrder2(root);
+    }
+    void preOrder2(void(*theVisit)(binaryTreeNode<E>* t)){
+        visit = theVisit;
+        preOrder2(root);
+    }
+    void postOrder2(void(*theVisit)(binaryTreeNode<E>* t)){
+        visit = theVisit;
+        postOrder2(root);
     }
 //private:
     binaryTreeNode<E>* root;
@@ -140,6 +184,8 @@ public:
     static void dispose(binaryTreeNode<E>* t){delete t;}
 
     static void inOrder2(binaryTreeNode<E> *t);
+    static void preOrder2(binaryTreeNode<E> *t);
+    static void postOrder2(binaryTreeNode<E> *t);
 
     static void output(binaryTreeNode<E>* t){
         if(t==NULL){
@@ -147,7 +193,6 @@ public:
             return;
         }
         cout<<t->element<<' ';
-        cout<<"derftg"<<endl;
     }
 
     int height(binaryTreeNode<E>* t) const;
@@ -227,7 +272,7 @@ void linkedBinaryTree<E>::levelOrder(int (*visit2)(binaryTreeNode<E> *t)) {
             q.push((nowNode->rightChild));
             nextLevelCount++;
         }
-        cout<<"xianzai de nextlevelcount is "<<nextLevelCount<<endl;
+        cout<<"now the nextlevelcount is "<<nextLevelCount<<endl;
         q.pop();
         nowLevelCount--;
         if(nowLevelCount==0){
@@ -324,39 +369,105 @@ void linkedBinaryTree<E>::inOrder2(binaryTreeNode<E> *t) {
     if(t==NULL){
         return;
     }
-    myStack.push(t);
-    while(!t->leftChild){
-        binaryTreeNode<E>* nowNode = myStack.top();
-        myStack.pop();
-        if(nowNode->rightChild!=NULL){
-            myStack.push(nowNode->rightChild);
+    while(!myStack.empty()||t){
+        while(t){
+            myStack.push(t);
+            t = t->leftChild;
         }
-        myStack.push(nowNode);
-        if(nowNode->leftChild!=NULL){
-            myStack.push(nowNode->leftChild);
+        if(!myStack.empty()) {
+            t = myStack.top();
+            myStack.pop();
+            visit(t);
+            t = t->rightChild;
         }
     }
+//    while(!myStack.empty()){
+//        while(t->leftChild){
+//            t = myStack.top();
+//            myStack.pop();
+//            if(t->rightChild!=NULL){
+//                myStack.push(t->rightChild);
+//            }
+//            myStack.push(t);
+//            if(t->leftChild!=NULL){
+//                myStack.push(t->leftChild);
+//            }
+//        }
+//        visit(myStack.top());
+//        myStack.pop();
+//        t = myStack.top();
+//    }
 
 }
+
+//chapter11-31
+template <typename E>
+void linkedBinaryTree<E>::preOrder2(binaryTreeNode<E> *t) {
+    stack<binaryTreeNode<E>*> myStack;
+    while(!myStack.empty()||t){
+        while(t){
+            visit(t);
+            myStack.push(t);
+            t = t->leftChild;
+        }
+        if(!myStack.empty()){
+            t = myStack.top();
+            myStack.pop();
+            t = t->rightChild;
+        }
+    }
+}
+
+//chapter11-32
+template <typename E>
+void linkedBinaryTree<E>::postOrder2(binaryTreeNode<E> *t) {
+    stack<binaryTreeNode<E>*> myStack;
+    if(t==NULL)
+        return;
+    binaryTreeNode<E>* pnow, *plast;
+    pnow = t;
+    plast = NULL;
+    while(pnow){
+        myStack.push(pnow);
+        pnow = pnow->leftChild;
+    }
+    while(!myStack.empty()){
+        pnow = myStack.top();
+        myStack.pop();
+        if(!pnow->rightChild||pnow->rightChild==plast){
+            visit(pnow);
+            plast = pnow;
+        }
+        else{
+            myStack.push(pnow);
+            pnow = pnow->rightChild;
+            while(pnow){
+                myStack.push(pnow);
+                pnow = pnow->leftChild;
+            }
+        }
+    }
+}
+
+
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
     int(1);
-    binaryTreeNode<int>* anode = new binaryTreeNode<int>(1);
-    linkedBinaryTree<int>* a = new linkedBinaryTree<int>();
-    a->root = anode;
+ //   binaryTreeNode<int>* anode = new binaryTreeNode<int>(1);
+ //   linkedBinaryTree<int>* a = new linkedBinaryTree<int>();
+ //   a->root = anode;
 // 0   a->visit = a->output;
-    cout<<anode->element<<endl;
+  //  cout<<anode->element<<endl;
     linkedBinaryTree<string>* b = new linkedBinaryTree<string>();
 //    b->root = b->makeTreeByPreOrder(b->root);
 //    b->preOrderOutput();
 //    cout<<b->root->element<<endl;
-    cout<<"333"<<endl;
     b->makeTreeByPreOrder2(&(b->root));
     b->preOrderOutput();
     cout<<"444"<<endl;
 
-    binaryTreeNode<string>* aaaa = new binaryTreeNode<string>();
+    binaryTreeNode<string>* aaaa;
     aaaa = b->copyBinaryTreeByPreOrder(b->root);
     cout<<"???"<<endl;
     linkedBinaryTree<string>* tree1 = new linkedBinaryTree<string>(aaaa);
@@ -372,6 +483,9 @@ int main() {
     tree2->preOrderOutput();
     tree2->getSize();
     tree2->getMaxSize();
+    tree2->inOrder2Output();
+    tree2->preOrder2Output();
+    tree2->postOrder2Output();
 
     return 0;
 }
