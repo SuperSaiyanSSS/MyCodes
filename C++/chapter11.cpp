@@ -25,9 +25,6 @@ using namespace std;
 //中序 dcbagfeh
 
 
-
-
-
 template <class T>
 class binaryTreeNode{
 public:
@@ -173,6 +170,84 @@ public:
         visit = theVisit;
         postOrder2(root);
     }
+
+    int ItemsNumber;
+
+    void buildTreeByPreOrderAndInOrder(){
+        cout<<"please input the preOrder items by space!"<<endl;
+        vector<string> preItems;
+        string item;
+        while(cin>>item){
+            if(cin.get()=='\n'){
+                break;
+            }
+            preItems.push_back(item);
+        }
+        cout<<"please input the inOrder items by space!"<<endl;
+        vector<string> inItems;
+        while(cin>>item){
+            if(cin.get()=='\n'){
+                break;
+            }
+            inItems.push_back(item);
+        }
+        ItemsNumber = preItems.size();
+        int inRoot = findAnotherVectorOrder(0, preItems, inItems);
+        cout<<"inROOT is "<<inRoot<<endl;
+        int inLeftStart = 0;
+        int inLeftEnd = inRoot-1;
+        int inRightStart = inRoot+1;
+        int inRightEnd = ItemsNumber-1;
+        root = new binaryTreeNode<string>(preItems[0]);
+        cout<<inLeftStart<<" "<<inLeftEnd<<" "<<inRightStart<<" "<<inRightEnd<<endl;
+        buildTreeByPreOrderAndInOrder(preItems, inItems, inLeftStart, inLeftEnd, 0, true, &root);
+        buildTreeByPreOrderAndInOrder(preItems, inItems, inRightStart, inRightEnd, 0, false, &root);
+    }
+
+    void buildTreeByInOrderAndPostOrder(){
+        cout<<"please input the inOrder items by space!"<<endl;
+        string item;
+        vector<string> inItems;
+        while(cin>>item){
+            if(cin.get()=='\n'){
+                break;
+            }
+            inItems.push_back(item);
+        }
+        cout<<"please input the postOrder items by space!"<<endl;
+        vector<string> postItems;
+        while(cin>>item){
+            if(cin.get()=='\n'){
+                break;
+            }
+            postItems.push_back(item);
+        }
+        ItemsNumber = postItems.size();
+
+    }
+
+    void testVector(vector<string> A){
+        for(vector<string>::iterator iter = A.begin();iter!=A.end();iter++){
+            cout<<(*iter)<<endl;
+        }
+        cout<<"end"<<endl;
+    }
+
+    int findAnotherVectorOrder(int oldOrder, vector<string>A, vector<string>B){
+        int count = 0;
+        for(auto iter = B.begin();iter!=B.end();iter++){
+            if(*iter==A[oldOrder]){
+                return count;
+            }
+            count++;
+        }
+        return -1;
+    }
+
+
+    void buildTreeByPreOrderAndInOrder(vector<string> preItems, vector<string> inItems, int inStart, int inEnd,
+            int preLastRoot, bool left, binaryTreeNode<string>** root_pp);
+
 //private:
     binaryTreeNode<E>* root;
     int treeSize;
@@ -449,43 +524,111 @@ void linkedBinaryTree<E>::postOrder2(binaryTreeNode<E> *t) {
     }
 }
 
+//chapter11-33
+template <typename E>
+void linkedBinaryTree<E>::buildTreeByPreOrderAndInOrder(vector<string> preItems, vector<string> inItems,
+                                                        int inStart, int inEnd, int preLastRoot, bool left,
+                                                        binaryTreeNode<string>** root_pp){
+    if(inStart>inEnd){
+        cout<<"inStart<inEnd"<<endl;
+        cout<<inStart<<inEnd<<endl;
+        return;
+    }
+    if(inStart==inEnd){
+        if(left){
+            (*root_pp)->leftChild = new binaryTreeNode<string>(inItems[inStart]);
+        } else{
+            (*root_pp)->rightChild = new binaryTreeNode<string>(inItems[inStart]);
+        }
+        cout<<"waht?"<<endl;
+        return;
+    }
+    cout<<"1001"<<endl;
+    int preNewRoot;
+    if(left){
+        preNewRoot =preLastRoot+1;
+    }
+    else{
+        int break_flag = false;
+        for(int i=preLastRoot+1;i<ItemsNumber;i++) {
+            if(break_flag)
+                break;
+            for (int j = inStart; j <= inEnd; j++) {
+                if (preItems[i] == inItems[j]) {
+                    preNewRoot = i;
+                    break_flag = true;
+                    break;
+                }
+            }
+        }
+    }
+    cout<<"1002"<<endl;
+    if(preNewRoot==-1){
+        throw "Cannot find newRoot in preOrder!";
+    }
+    int inNewRoot = findAnotherVectorOrder(preNewRoot, preItems, inItems);
+    binaryTreeNode<string>* newRoot_p = new binaryTreeNode<string>(preItems[preNewRoot]);
+    binaryTreeNode<string>** newRoot_pp = &(newRoot_p);
+    if(left){
+        (*root_pp)->leftChild = newRoot_p;
+    } else{
+        (*root_pp)->rightChild = newRoot_p;
+    }
+    int NewLeftInStart, NewLeftInEnd, NewRightInStart, NewRightInEnd;
+    NewLeftInStart = inStart;
+    NewLeftInEnd = inNewRoot-1;
+    NewRightInStart = inNewRoot+1;
+    NewRightInEnd = inEnd;
+    cout<<"Now newROOT is "<<inNewRoot<<endl;
+    cout<<NewLeftInStart<<", "<<NewLeftInEnd<<" ; "<<NewRightInStart<<", "<<NewRightInEnd<<endl;
+    buildTreeByPreOrderAndInOrder(preItems, inItems, NewLeftInStart, NewLeftInEnd, preNewRoot, true, newRoot_pp);
+    buildTreeByPreOrderAndInOrder(preItems, inItems, NewRightInStart, NewRightInEnd, preNewRoot, false, newRoot_pp);
+    return;
+}
+
 
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
     int(1);
+
+    linkedBinaryTree<string> *atree = new linkedBinaryTree<string>();
+    atree->buildTreeByPreOrderAndInOrder();
+    atree->inOrder2Output();
+    atree->postOrder2Output();
+   // cout<<atree->root->leftChild->element<<endl;
  //   binaryTreeNode<int>* anode = new binaryTreeNode<int>(1);
  //   linkedBinaryTree<int>* a = new linkedBinaryTree<int>();
  //   a->root = anode;
 // 0   a->visit = a->output;
   //  cout<<anode->element<<endl;
-    linkedBinaryTree<string>* b = new linkedBinaryTree<string>();
-//    b->root = b->makeTreeByPreOrder(b->root);
+//    linkedBinaryTree<string>* b = new linkedBinaryTree<string>();
+////    b->root = b->makeTreeByPreOrder(b->root);
+////    b->preOrderOutput();
+////    cout<<b->root->element<<endl;
+//    b->makeTreeByPreOrder2(&(b->root));
 //    b->preOrderOutput();
-//    cout<<b->root->element<<endl;
-    b->makeTreeByPreOrder2(&(b->root));
-    b->preOrderOutput();
-    cout<<"444"<<endl;
-
-    binaryTreeNode<string>* aaaa;
-    aaaa = b->copyBinaryTreeByPreOrder(b->root);
-    cout<<"???"<<endl;
-    linkedBinaryTree<string>* tree1 = new linkedBinaryTree<string>(aaaa);
-    tree1->preOrderOutput();
-    tree1->erase();
-    tree1->preOrderOutput();
-    cout<<"33333"<<endl;
-    tree1->preOrderOutput();
-    cout<<"11111111111"<<endl;
-    binaryTreeNode<string>* bbbb;
-    bbbb = b->copyBinaryTreeByPreOrder(b->root);
-    linkedBinaryTree<string>* tree2 = new linkedBinaryTree<string>(bbbb);
-    tree2->preOrderOutput();
-    tree2->getSize();
-    tree2->getMaxSize();
-    tree2->inOrder2Output();
-    tree2->preOrder2Output();
-    tree2->postOrder2Output();
+//    cout<<"444"<<endl;
+//
+//    binaryTreeNode<string>* aaaa;
+//    aaaa = b->copyBinaryTreeByPreOrder(b->root);
+//    cout<<"???"<<endl;
+//    linkedBinaryTree<string>* tree1 = new linkedBinaryTree<string>(aaaa);
+//    tree1->preOrderOutput();
+//    tree1->erase();
+//    tree1->preOrderOutput();
+//    cout<<"33333"<<endl;
+//    tree1->preOrderOutput();
+//    cout<<"11111111111"<<endl;
+//    binaryTreeNode<string>* bbbb;
+//    bbbb = b->copyBinaryTreeByPreOrder(b->root);
+//    linkedBinaryTree<string>* tree2 = new linkedBinaryTree<string>(bbbb);
+//    tree2->preOrderOutput();
+//    tree2->getSize();
+//    tree2->getMaxSize();
+//    tree2->inOrder2Output();
+//    tree2->preOrder2Output();
+//    tree2->postOrder2Output();
 
     return 0;
 }
