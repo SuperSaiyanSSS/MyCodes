@@ -73,6 +73,10 @@ public:
     ~linkedBinaryTree(){
         erase();
     }
+
+    //左右子树里较低的那个树的高度
+    static int test_h;
+
     typedef void (*visitfun)(binaryTreeNode<E>*);
     static void (*visit) (binaryTreeNode<E>*);
 
@@ -223,8 +227,23 @@ public:
             postItems.push_back(item);
         }
         ItemsNumber = postItems.size();
+        int postNewRoot = ItemsNumber-1;
+        int inNewRoot = findAnotherVectorOrder(postNewRoot, postItems, inItems);
+        int inLeftStart, inLeftEnd, inRightStart, inRightEnd;
+
+        inLeftStart = 0;
+        inLeftEnd = inNewRoot-1;
+        inRightStart = inNewRoot+1;
+        inRightEnd = ItemsNumber-1;
+        root = new binaryTreeNode<E>(postItems[ItemsNumber-1]);
+        binaryTreeNode<E>** root_pp = &root;
+        buildTreeByInOrderAndPostOrder(inItems, postItems, inLeftStart, inLeftEnd, postNewRoot, true, &root);
+        buildTreeByInOrderAndPostOrder(inItems, postItems, inRightStart, inRightEnd, postNewRoot, false, &root);
 
     }
+
+    void buildTreeByInOrderAndPostOrder(vector<string> inItems, vector<string> postItems, int inStart, int inEnd,
+                                            int postLastRoot, bool left, binaryTreeNode<E>** lastRoot_pp);
 
     void testVector(vector<string> A){
         for(vector<string>::iterator iter = A.begin();iter!=A.end();iter++){
@@ -363,12 +382,14 @@ void linkedBinaryTree<E>::levelOrder(int (*visit2)(binaryTreeNode<E> *t)) {
     cout<<"The max is "<<maxLevel<<" lou de "<<maxLevelCount<<endl;
 }
 
+
 template <class E>
 int linkedBinaryTree<E>::height(binaryTreeNode<E> *t) const {
     if(t==NULL)
         return 0;
     int h1 = height(t->leftChild);
     int h2 = height(t->rightChild);
+    test_h = h2>h1?(h1+1):(h2+1);
     return h1>h2?++h1:++h2;
 }
 
@@ -585,17 +606,98 @@ void linkedBinaryTree<E>::buildTreeByPreOrderAndInOrder(vector<string> preItems,
     buildTreeByPreOrderAndInOrder(preItems, inItems, NewRightInStart, NewRightInEnd, preNewRoot, false, newRoot_pp);
     return;
 }
+//chapter11-34
+//由于只有在每个节点的度数都为0或2的情况下，即完全二叉树，根据前序和后序才能唯一确定二叉树
+//因此先判断输入的节点数是否满足完全二叉树（0，1，3，7.。。）
+//若不满足 返回失败
+//满足 则根据前序就可构建出该完全二叉树
+//再后序遍历该二叉树，将所得序列与输入的后序进行比较
+//若相同 则正确构造
+//若不同 则给定的前序和后序无法构造出二叉树
 
 
+//chapter11-35
+template <typename E>
+void linkedBinaryTree<E>::buildTreeByInOrderAndPostOrder(vector<string> inItems, vector<string> postItems,
+                                                         int inStart, int inEnd,
+                                    int postLastRoot, bool left, binaryTreeNode<E>** lastRoot_pp){
+    if(inStart>inEnd){
+        return;
+    }
+    if(inStart==inEnd){
+        if(left){
+            (*lastRoot_pp)->leftChild = new binaryTreeNode<E>(inItems[inStart]);
+        } else{
+            (*lastRoot_pp)->rightChild = new binaryTreeNode<E>(inItems[inStart]);
+        }
+        return;
+    }
+    int inNewRoot;
+    int postNewRoot;
+    if(!left){
+        postNewRoot = postLastRoot-1;
+        inNewRoot = findAnotherVectorOrder(postNewRoot, postItems, inItems);
+    }
+    else{
+        postNewRoot = 0;
+        bool findRoot = false;
+        for(int i=ItemsNumber-1;i>=0;i--){
+            if(findRoot){
+                break;
+            }
+            for(int j=inStart;j<=inEnd;j++){
+                if(postItems[i]==inItems[j]){
+                    postNewRoot = i;
+                    findRoot = true;
+                    break;
+                }
+            }
+        }
+        inNewRoot = findAnotherVectorOrder(postNewRoot, postItems, inItems);
+    }
+    int inLeftNewStart, inLeftNewEnd, inRightNewStart, inRightNewEnd;
+    inRightNewStart = inNewRoot+1;
+    inRightNewEnd = inEnd;
+    inLeftNewStart = inStart;
+    inLeftNewEnd = inNewRoot-1;
+    binaryTreeNode<E>* newRoot_p = new binaryTreeNode<E>(inItems[inNewRoot]);
+    binaryTreeNode<E>** newRoot_pp = &newRoot_p;
+    if(left){
+        (*lastRoot_pp)->leftChild = newRoot_p;
+    }
+    else{
+        (*lastRoot_pp)->rightChild = newRoot_p;
+    }
+    buildTreeByInOrderAndPostOrder(inItems, postItems, inLeftNewStart, inLeftNewEnd, postNewRoot, true, newRoot_pp);
+    buildTreeByInOrderAndPostOrder(inItems, postItems, inRightNewStart, inRightNewEnd, postNewRoot, false, newRoot_pp);
+    return;
+}
+
+//chapter11-45
+//比较两个二叉树的前序中序序列是否相等即可
+//时间复杂度O(n)
+
+//chapter11-46
+//顺序遍历时交换左右子树的指针即可
+//时间复杂度O(n)
+
+//chapter11-47
+//对每一个节点都用height函数计算其较高子树的高度，利用test_h静态变量获取其较低字树的高度，取差值最大的那个节点的值即可
+template <typename T> int linkedBinaryTree<T>::test_h;
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
     int(1);
 
     linkedBinaryTree<string> *atree = new linkedBinaryTree<string>();
-    atree->buildTreeByPreOrderAndInOrder();
+//    atree->buildTreeByPreOrderAndInOrder();
+//    atree->inOrder2Output();
+//    atree->postOrder2Output();
+    atree->buildTreeByInOrderAndPostOrder();
     atree->inOrder2Output();
-    atree->postOrder2Output();
+    atree->preOrderOutput();
+    cout<<atree->height()<<endl;
+    cout<<atree->test_h<<endl;
    // cout<<atree->root->leftChild->element<<endl;
  //   binaryTreeNode<int>* anode = new binaryTreeNode<int>(1);
  //   linkedBinaryTree<int>* a = new linkedBinaryTree<int>();
