@@ -176,3 +176,13 @@ typedef void (*visitfun)(binaryTreeNode<E>*);
 template <class E>
 typename linkedBinaryTree<E>::visitfun linkedBinaryTree<E>::visit = nullptr;
 ```
+
+### 并查集
+### 重量规则引理
+#### 假设从单元素集合出发，用重量规则进行合并操作。若以此方式构建一棵具有p个节点的树t,则t的高度最多为(向上取整[log2 p])+1
+#### 证明：数学归纳法。考虑创建树t的最后一次合并操作unite(k,j)。设树j的节点数为m,树k的节点数为p-m，可假设1<=m<=p/2，于是，树j成为树k的子树
+#### 树t的高度要么与k的高度相同，要么比j的高度大1
+#### 若为前者，则t的高度<=向上取整([log2(p-m)])+1<=向上取整([log2p])+1
+#### 若为后者，则t的高度<=向上取整([log2(m)])+2<=向上取整([log2(p/2)])+2<=向上取整([log2(o)])+1
+可利用路径压缩过程改进查找函数在最坏情况下的性能/
+有路径紧缩/路径分割/路径对折等实现方法
