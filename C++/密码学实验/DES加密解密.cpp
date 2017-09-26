@@ -5,7 +5,7 @@
 using namespace std;
 
 
-//次方函数 C++自带的次方函数有问题
+// 次方函数 C++自带的次方函数有问题
 int cifang(int base, int cishu){
     int num =1;
     if(cishu==0){
@@ -17,7 +17,7 @@ int cifang(int base, int cishu){
     return num;
 }
 
-//二进制转十进制
+// 二进制转十进制
 int twoToten(int two_num){
     int ten_num=0;
     int count=0;
@@ -32,7 +32,7 @@ int twoToten(int two_num){
 }
 
 
-//字符串转数字
+// 字符串转数字
 int stringToInt(string s){
     stringstream ss;
     int a;
@@ -42,7 +42,7 @@ int stringToInt(string s){
 }
 
 
-//十进制数字转二进制数字表示的字符串
+// 十进制数字转二进制数字表示的字符串
 string tenToTwo(int ten_num){
     string two_string = "";
     for(int i=ten_num;i!=0;i=i/2){
@@ -54,7 +54,7 @@ string tenToTwo(int ten_num){
 
 
 
-//将姓名转换成二进制数字表示的字符串
+// 将姓名转换成二进制数字表示的字符串
 string nameToBitString(string name){
     int length = name.size();
     string two_string="";
@@ -66,7 +66,7 @@ string nameToBitString(string name){
 }
 
 
-//奇偶校验
+// 奇偶校验
 bitset<64> check(bitset<56>s56){
     bitset<64>s64;
     int check_flag = 0;
@@ -232,50 +232,48 @@ int P[] = {16,  7, 20, 21,
            19, 13, 30,  6,
            22, 11,  4, 25 };
 
+bitset<64> plaintext;
+bitset<32> plaintext_L;
+bitset<32> plaintext_R;
 
-int main() {
+bitset<64> ciphertext;
+
+// test[16]存储16轮每轮的轮密钥
+bitset<48> test[16];
+
+// 64位密钥由密钥次序建立的54位真·种子密钥
+bitset<54>key54;
+
+// S盒映射P盒置换后得到的32位密文
+bitset<32> S_flex;
+
+
+// 获取密钥 存储在key54中
+void getKey(){
 
     //设定56位种子密钥
     //密钥内容为名字的倒序-'a'
-    string strval = nameToBitString("wxw");
+    string strval = nameToBitString("魔人布偶");
     bitset<56>ss(strval);
-    for(int i=0;i<56;i++){
-        cout<<ss[i]<<" ";
-    }
-    cout<<endl;
+
     //56位加奇偶校验拓展为64位
     bitset<64>key64;
     key64 = check(ss);
-    for(int i=0;i<64;i++){
-        cout<<key64[i]<<" ";
-    }
 
     //64位密钥由密钥次序建立54位真·种子密钥
-    bitset<54>key54;
     for(int i=0;i<54;i++){
         key54[i] = key64[PC_1[i]];
     }
 
-    cout<<"the real K is"<<key54<<endl;
+    cout<<"the real K is "<<key54<<endl;
 
     //test[16]存储16轮每轮的轮密钥
-    bitset<48> test[16];
     getEachK(key54, test);
-//    cout<<endl;
-//    for(int i=0;i<16;i++){
-//        cout<<test[i]<<endl;
-//    }
+}
 
-    bitset<64> plaintext;
-    bitset<32> plaintext_L;
-    bitset<32> plaintext_R;
-    plaintext_L[1] = 1;
-//    plaintext[0] = 1;
-//    plaintext[1] = 0;
+// DES加密函数
+void encrypt(){
 
-
-    //S盒映射
-    bitset<32> S_flex;
     //计算16轮DES加密
     for(int i=0;i<16;i++){
         bitset<32> L, R;
@@ -292,7 +290,6 @@ int main() {
         }
 
         bitset<48> EA_J = EA ^ test[i];
-        //cout<<EA_J<<endl;
 
         //S盒的标号
         for(int count_s=0;count_s<8;count_s++){
@@ -308,25 +305,15 @@ int main() {
 
 
             S_flex[count_s*4+3] = target_s%10;
-          //  cout<<target_s<<endl;
-          //  cout<<"yih"<<endl;
-          //  cout<<S_flex[count_s*4+3]<<endl;
             target_s/=10;
 
             S_flex[count_s*4+2] = target_s%10;
-          //  cout<<"target_s "<<target_s<<endl;
-          //  cout<<S_flex[count_s*4+2]<<endl;
             target_s/=10;
 
             S_flex[count_s*4+1] = target_s%10;
-        //    cout<<"target_s "<<target_s<<endl;
-         //   cout<<S_flex[count_s*4+1]<<endl;
             target_s/=10;
 
             S_flex[count_s*4] = target_s%10;
-         //   cout<<"target_s "<<target_s<<endl;
-          //  cout<<"check "<<target_s%10<<endl;
-          //  cout<<S_flex[count_s*4]<<endl;
             target_s/=10;
 
         }
@@ -346,26 +333,26 @@ int main() {
         cout<<plaintext_L<<endl;
         cout<<plaintext_R<<endl;
 
-
-
     }
     cout<<endl;
     cout<<"@@@@@@@@@@@@@@@@@@@"<<endl;
     cout<<plaintext_L<<plaintext_R<<endl;
-    cout<<plaintext_L.size()<<endl;
 
     cout<<"-------------------------"<<endl;
 
-
-   swap(plaintext_L, plaintext_R);
-
+    //将密文存储至全局变量
     for(int kk=0;kk<32;kk++){
-        plaintext[kk] = plaintext_L[kk];
-        plaintext[kk+32] = plaintext_R[kk];
+        plaintext[kk] = ciphertext[kk];
+        plaintext[kk+32] = ciphertext[kk];
     }
-//    cout<<S_flex<<endl;
 
-//
+}
+
+
+void decrypt(){
+
+    swap(plaintext_L, plaintext_R);
+
     //计算16轮DES加密
     for(int i=0;i<16;i++){
         bitset<32> L, R;
@@ -382,7 +369,6 @@ int main() {
         }
 
         bitset<48> EA_J = EA ^ test[15-i];
-        //cout<<EA_J<<endl;
 
         //S盒的标号
         for(int count_s=0;count_s<8;count_s++){
@@ -398,29 +384,18 @@ int main() {
 
 
             S_flex[count_s*4+3] = target_s%10;
-          //  cout<<target_s<<endl;
-          //  cout<<"yih"<<endl;
-          //  cout<<S_flex[count_s*4+3]<<endl;
             target_s/=10;
 
             S_flex[count_s*4+2] = target_s%10;
-           // cout<<"target_s "<<target_s<<endl;
-           // cout<<S_flex[count_s*4+2]<<endl;
             target_s/=10;
 
             S_flex[count_s*4+1] = target_s%10;
-           // cout<<"target_s "<<target_s<<endl;
-           // cout<<S_flex[count_s*4+1]<<endl;
             target_s/=10;
 
             S_flex[count_s*4] = target_s%10;
-           // cout<<"target_s "<<target_s<<endl;
-           // cout<<"check "<<target_s%10<<endl;
-          //  cout<<S_flex[count_s*4]<<endl;
             target_s/=10;
 
         }
-
 
         //置换P盒
         bitset<32> C_temp;
@@ -434,16 +409,34 @@ int main() {
         plaintext_R = L ^ S_flex;
 
 
-
         cout<<plaintext_L<<endl;
         cout<<plaintext_R<<endl;
 
 
     }
     cout<<"@@@@@@@@@@@@@@@@@@@"<<endl;
-   // swap(plaintext_L, plaintext_R);
-    cout<<plaintext_L<<plaintext_R<<endl;
 
+    //置换函数P- （P为正序无操作 P-则倒序）
+    for(int i=31;i>=0;i--){
+        plaintext[i] = plaintext_L[31-i];
+        plaintext[32+i] = plaintext_R[31-i];
+    }
+    cout<<plaintext<<endl;
+
+
+}
+
+int main() {
+
+    // 获取密钥 存储在key54中
+    getKey();
+
+    plaintext_L[1] = 1;
+    plaintext_R[31] = 1;
+
+    encrypt();
+
+    decrypt();
 
     return 0;
 }
