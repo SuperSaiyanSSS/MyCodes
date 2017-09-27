@@ -1,6 +1,8 @@
 #include <iostream>
 #include <bitset>
 #include <sstream>
+#include <fstream>
+#include <cassert>
 
 using namespace std;
 
@@ -232,6 +234,27 @@ int P[] = {16,  7, 20, 21,
            19, 13, 30,  6,
            22, 11,  4, 25 };
 
+
+
+void readTxt(string file)
+{
+    ifstream infile;
+    infile.open(file.data());   //将文件流对象与文件连接起来
+    assert(infile.is_open());   //若失败,则输出错误消息,并终止程序运行
+
+    char c;
+    infile >> noskipws;
+    while (!infile.eof())
+    {
+        infile>>c;
+        cout<<c<<endl;
+
+    }
+    infile.close();             //关闭文件输入流
+}
+
+
+
 bitset<64> plaintext;
 bitset<32> plaintext_L;
 bitset<32> plaintext_R;
@@ -273,6 +296,12 @@ void getKey(){
 
 // DES加密函数
 void encrypt(){
+
+    cout<<"ming wen is "<<plaintext<<endl;
+    for(int i=0;i<32;i++){
+        plaintext_L[i] = plaintext[i];
+        plaintext_R[i] = plaintext[i+32];
+    }
 
     //计算16轮DES加密
     for(int i=0;i<16;i++){
@@ -330,8 +359,8 @@ void encrypt(){
         plaintext_L = R;
         plaintext_R = L ^ S_flex;
 
-        cout<<plaintext_L<<endl;
-        cout<<plaintext_R<<endl;
+   //     cout<<plaintext_L<<endl;
+  //      cout<<plaintext_R<<endl;
 
     }
     cout<<endl;
@@ -409,19 +438,26 @@ void decrypt(){
         plaintext_R = L ^ S_flex;
 
 
-        cout<<plaintext_L<<endl;
-        cout<<plaintext_R<<endl;
+  //      cout<<plaintext_L<<endl;
+   //     cout<<plaintext_R<<endl;
 
 
     }
     cout<<"@@@@@@@@@@@@@@@@@@@"<<endl;
 
     //置换函数P- （P为正序无操作 P-则倒序）
-    for(int i=31;i>=0;i--){
-        plaintext[i] = plaintext_L[31-i];
-        plaintext[32+i] = plaintext_R[31-i];
+//    for(int i=31;i>=0;i--){
+//        plaintext[i] = plaintext_L[31-i];
+//        plaintext[32+i] = plaintext_R[31-i];
+//    }
+
+    swap(plaintext_R, plaintext_L);
+
+    for(int i=0;i<32;i++){
+        plaintext[i] = plaintext_L[i];
+        plaintext[i+32] = plaintext_R[i];
     }
-    cout<<plaintext<<endl;
+    cout<<"result is "<<plaintext<<endl;
 
 
 }
@@ -430,13 +466,66 @@ int main() {
 
     // 获取密钥 存储在key54中
     getKey();
+    ifstream t("D:\\011.txt");
+    stringstream buffer;
+    buffer << t.rdbuf();
+    string contents(buffer.str());
+    cout<<"content is "<<contents<<endl;
+    for(int i=0;i+7<contents.size();i++){
+        cout<<"i is "<<contents[i]<<endl;
+    }
+    int content_size = contents.size();
+    int loop_content = content_size/8;
+    int yushu = content_size%8;
 
-    plaintext_L[1] = 1;
-    plaintext_R[31] = 1;
+    //分两批读取比特流并加解密
+    for(int i=0;i<loop_content;i++){
+        bitset<8> iter[8];
+        plaintext = 0;
+        for(int j=i;j<i+8;j++){
+            iter[j] = contents[j+8*i];
+        }
+        for(int ii=0;ii<8;ii++){
+            for(int jj=0;jj<8;jj++){
+                plaintext[ii*8+jj] = iter[ii][jj];
+            }
+        }
+
+        encrypt();
+        decrypt();
+
+        cout<<plaintext.to_string()<<endl;
+        fstream file1;
+        file1.open("D://b137.txt", ios::app | ios::out);
+        file1.write((char*)&plaintext,sizeof(plaintext));
+        file1.close();
+    }
+
+    bitset<8> iter[8];
+    plaintext = 0;
+    for(int j=0;j<yushu;j++){
+        iter[j] = contents[j+8*loop_content];
+    }
+    for(int ii=0;ii<yushu;ii++){
+        for(int jj=0;jj<8;jj++){
+            plaintext[ii*8+jj] = iter[ii][jj];
+        }
+    }
 
     encrypt();
-
     decrypt();
+
+    cout<<plaintext.to_string()<<endl;
+    fstream file1;
+    file1.open("D://b137.txt", ios::app | ios::out);
+    file1.write((char*)&plaintext,sizeof(plaintext));
+    file1.close();
+
+
+    plaintext = 3;
+    encrypt();
+    decrypt();
+
 
     return 0;
 }
