@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 	for(i=0;i<m;i++){
 		scanf("%[^\n]", &moban[i]); 
 		fflush(stdin);
-//		printf("%s ------- %d\n", moban[i], i); 
+		printf("%s ------- %d\n", moban[i], i); 
 	//	gets(moban[i]);
 	}
 	for(i=0;i<n;i++){
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 			int zishu = strlen(moban[i]);
 			for(j=0;j<zishu-6;j++){
 				if(moban[i][j]=='{'&&moban[i][j+1]=='{'&&moban[i][j+2]==' '){
-					for(k=j+3;k<zishu-3;k++){
+					for(k=j+3;k<zishu-2;k++){
 						if(moban[i][k]==' '&&moban[i][k+1]=='}'&&moban[i][k+2]=='}'){
 							node* myNode = (node*)malloc(sizeof(node));
 							myNode->i1 = j;
@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 		printf("\n");
 	}
 	printf("%s", moban[m-1]);
-
+	
 
 	return 0;
 }
