@@ -371,9 +371,14 @@ void encrypt(){
 
     //将密文存储至全局变量
     for(int kk=0;kk<32;kk++){
-        plaintext[kk] = ciphertext[kk];
-        plaintext[kk+32] = ciphertext[kk];
+        plaintext[kk] = plaintext_L[kk];
+        plaintext[kk+32] = plaintext_R[kk];
     }
+
+    fstream file1;
+    file1.open("D://b138.txt", ios::app | ios::out);
+    file1.write((char*)&plaintext,sizeof(plaintext));
+    file1.close();
 
 }
 
@@ -437,19 +442,10 @@ void decrypt(){
         plaintext_L = R;
         plaintext_R = L ^ S_flex;
 
-
-  //      cout<<plaintext_L<<endl;
-   //     cout<<plaintext_R<<endl;
-
-
     }
     cout<<"@@@@@@@@@@@@@@@@@@@"<<endl;
 
-    //置换函数P- （P为正序无操作 P-则倒序）
-//    for(int i=31;i>=0;i--){
-//        plaintext[i] = plaintext_L[31-i];
-//        plaintext[32+i] = plaintext_R[31-i];
-//    }
+    //置换函数P- （P为无操作 P-也无操作）
 
     swap(plaintext_R, plaintext_L);
 
@@ -462,70 +458,146 @@ void decrypt(){
 
 }
 
+
+
 int main() {
 
     // 获取密钥 存储在key54中
     getKey();
-    ifstream t("D:\\011.txt");
-    stringstream buffer;
-    buffer << t.rdbuf();
-    string contents(buffer.str());
-    cout<<"content is "<<contents<<endl;
-    for(int i=0;i+7<contents.size();i++){
-        cout<<"i is "<<contents[i]<<endl;
-    }
-    int content_size = contents.size();
-    int loop_content = content_size/8;
-    int yushu = content_size%8;
 
-    //分两批读取比特流并加解密
-    for(int i=0;i<loop_content;i++){
+    cout<<"加密图片请按1，加密文字请按2"<<endl;
+    int choose;
+    cin>>choose;
+    if(choose==2) {
+        //读取明文
+        ifstream t("D:\\1.txt");
+        stringstream buffer;
+        buffer << t.rdbuf();
+        string contents(buffer.str());
+        cout << "content is " << contents << endl;
+
+        int content_size = contents.size();
+        int loop_content = content_size / 8;
+        int yushu = content_size % 8;
+
+        //分两批读取比特流并加解密
+        for (int i = 0; i < loop_content; i++) {
+            bitset<8> iter[8];
+            plaintext = 0;
+            for (int j = 0; j < 8; j++) {
+                iter[j] = contents[j + 8 * i];
+            }
+            for (int ii = 0; ii < 8; ii++) {
+                for (int jj = 0; jj < 8; jj++) {
+                    plaintext[ii * 8 + jj] = iter[ii][jj];
+                }
+            }
+
+            encrypt();
+            decrypt();
+
+            cout << plaintext.to_string() << endl;
+            fstream file1;
+            file1.open("D://2.txt", ios::app | ios::out);
+            file1.write((char *) &plaintext, sizeof(plaintext));
+            file1.close();
+        }
+
         bitset<8> iter[8];
         plaintext = 0;
-        for(int j=i;j<i+8;j++){
-            iter[j] = contents[j+8*i];
+        for (int j = 0; j < yushu; j++) {
+            iter[j] = contents[j + 8 * loop_content];
         }
-        for(int ii=0;ii<8;ii++){
-            for(int jj=0;jj<8;jj++){
-                plaintext[ii*8+jj] = iter[ii][jj];
+        for (int ii = 0; ii < yushu; ii++) {
+            for (int jj = 0; jj < 8; jj++) {
+                plaintext[ii * 8 + jj] = iter[ii][jj];
             }
         }
 
         encrypt();
         decrypt();
 
-        cout<<plaintext.to_string()<<endl;
+//    for(int ii=0;ii<yushu;ii++){
+//        bitset<8> chars;
+//        for(int jj=0;jj<8;jj++){
+//            chars[jj] = plaintext[ii*8+jj];
+//        }
+//        fstream file1;
+//        file1.open("D://b137.txt", ios::app | ios::out);
+//        file1.write((char*)&chars,sizeof(chars));
+//        file1.close();
+//    }
+
+        cout << plaintext.to_string() << endl;
         fstream file1;
-        file1.open("D://b137.txt", ios::app | ios::out);
-        file1.write((char*)&plaintext,sizeof(plaintext));
+        file1.open("D://2.txt", ios::app | ios::out);
+        file1.write((char *) &plaintext, yushu);
         file1.close();
     }
+    else if(choose==1){
 
-    bitset<8> iter[8];
-    plaintext = 0;
-    for(int j=0;j<yushu;j++){
-        iter[j] = contents[j+8*loop_content];
-    }
-    for(int ii=0;ii<yushu;ii++){
-        for(int jj=0;jj<8;jj++){
-            plaintext[ii*8+jj] = iter[ii][jj];
+        //读取明文
+        ifstream t("D:\\1.bmp", ios::binary);
+        stringstream buffer;
+        buffer << t.rdbuf();
+        string contents(buffer.str());
+        cout << "content is " << contents << endl;
+
+        int content_size = contents.size();
+        int loop_content = content_size / 8;
+        int yushu = content_size % 8;
+
+        //分两批读取比特流并加解密
+        for (int i = 0; i < loop_content; i++) {
+            bitset<8> iter[8];
+            plaintext = 0;
+            for (int j = 0; j < 8; j++) {
+                iter[j] = contents[j + 8 * i];
+            }
+            for (int ii = 0; ii < 8; ii++) {
+                for (int jj = 0; jj < 8; jj++) {
+                    plaintext[ii * 8 + jj] = iter[ii][jj];
+                }
+            }
+
+            encrypt();
+            decrypt();
+
+            cout << plaintext.to_string() << endl;
+            fstream file1;
+            file1.open("D://2.bmp", ios::binary | ios::app | ios::out);
+            file1.write((char *) &plaintext, sizeof(plaintext));
+            file1.close();
         }
+
+        bitset<8> iter[8];
+        plaintext = 0;
+        for (int j = 0; j < yushu; j++) {
+            iter[j] = contents[j + 8 * loop_content];
+        }
+        for (int ii = 0; ii < yushu; ii++) {
+            for (int jj = 0; jj < 8; jj++) {
+                plaintext[ii * 8 + jj] = iter[ii][jj];
+            }
+        }
+
+        encrypt();
+        decrypt();
+
+        cout << plaintext.to_string() << endl;
+        fstream file1;
+        file1.open("D://2.bmp", ios::binary | ios::app | ios::out);
+        file1.write((char *) &plaintext, yushu);
+        file1.close();
+
+    }
+    else{
+        cout<<"非法输入！"<<endl;
     }
 
-    encrypt();
-    decrypt();
-
-    cout<<plaintext.to_string()<<endl;
-    fstream file1;
-    file1.open("D://b137.txt", ios::app | ios::out);
-    file1.write((char*)&plaintext,sizeof(plaintext));
-    file1.close();
-
-
-    plaintext = 3;
-    encrypt();
-    decrypt();
-
+//    plaintext = 3;
+//    encrypt();
+//    decrypt();
 
     return 0;
 }
