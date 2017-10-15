@@ -26,7 +26,7 @@ void insert(RCB* , PCB* );
 void remove(vector<PCB*>& list, PCB* SELF);
 void remove(vector<RCB*>& list, RCB* SELF);
 void scheduler();
-vector<PCB*>::iterator remove_highest_process_in_queue(vector<PCB*>& list);
+PCB* remove_highest_process_in_queue(vector<PCB*>& list);
 
 
 
@@ -150,15 +150,17 @@ public:
         remove(this->other_resources, (*iter));
         if((*iter)->waiting_list.size()!=0){
             (*iter)->status = "allocated";
-            vector<PCB*>::iterator highest_process_iter = remove_highest_process_in_queue((*iter)->waiting_list);
-            (*highest_process_iter)->status_code = 0;
-            (*highest_process_iter)->status_list.pop_back();
-            (*highest_process_iter)->other_resources.push_back((*iter));
+            PCB* highest_process = remove_highest_process_in_queue((*iter)->waiting_list);
+            // TODO： 当进程需要多个资源时 需要修改此处逻辑！
+            highest_process->status_code = 0;
+            highest_process->status_list.pop_back();
+            highest_process->other_resources.push_back((*iter));
             // 将该资源的阻塞队列中最高优先级的进程提取到就绪队列中
-            READY_QUEUE.push_back((*highest_process_iter));
+            READY_QUEUE.push_back(highest_process);
 
-            //TODO: C++的BUG？ 传入的string类型的ID变乱码导致崩溃
-          //  cout<<"资源 "<<RID<<" 自由后被 "<<(*highest_process_iter)->ID<<" 占有！"<<endl;
+            // C++的BUG？ 传入的string类型的ID变乱码导致崩溃
+            // 解决：之前传递的不是引用 而是按值传递 相当于没有修改
+            // cout<<"资源 "<<RID<<" 自由后被 "<<(*highest_process_iter)->ID<<" 占有！"<<endl;
         }
         else{
             cout<<"资源 "<<RID<<" 已自由"<<endl;
@@ -240,19 +242,24 @@ void remove(vector<RCB*>& list, RCB* SELF){
 }
 
 // 删除某队列优先级最高的进程，并返回其指针
-vector<PCB*>::iterator remove_highest_process_in_queue(vector<PCB*>& list){
-    vector<PCB*>::iterator target_PCB = list.begin();
-    int highest = (*target_PCB)->priority;
-    for(vector<PCB*>::iterator iter=list.begin();iter!=list.end();iter++){
+PCB* remove_highest_process_in_queue(vector<PCB*>& list){
+    PCB* target_PCB = list[0];
+    vector<PCB*>::iterator iter;
+    vector<PCB*>::iterator target_iter;
+    target_iter = list.begin();
+    int highest = (target_PCB)->priority;
+    for(iter=list.begin();iter!=list.end();iter++){
         if(highest<(*iter)->priority){
             highest = (*iter)->priority;
-            target_PCB = iter;
+            target_PCB = *iter;
+            target_iter = iter;
         }
+        cout<<"-- "<<(*iter)->ID<<" 的优先级"<<(*iter)->priority<<endl;
     }
-    list.erase(target_PCB);
-    cout<<"sttststst     "<<endl;
+    cout<<"目标"<<target_PCB->ID<<endl;
+    list.erase(target_iter);
     cout<<list.size()<<endl;
-    cout<<"资源  自由后被 "<<(*target_PCB)->ID<<" 占有！"<<endl;
+    cout<<"资源  自由后被 "<<target_PCB->ID<<" 占有！"<<endl;
     //cout<<(*target_PCB)->ID<<endl;
     return target_PCB;
 
@@ -324,8 +331,6 @@ int main()
 
         scheduler();
 
-        cin>>command;
-
         vector<PCB*>::iterator iter;
         cout<<"当前内存中的所有进程及其优先级为";
         for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
@@ -339,6 +344,9 @@ int main()
            // scheduler();
         }
 
+        cout<<"当前运行进程："<<NOW_PROCESS->ID<<endl;
+
+        cin>>command;
 
         if(command=="cr"){
             cin>>name>>priority;
@@ -394,3 +402,7 @@ int main()
     return 0;
 }
 
+
+// 记住要传递引用。。。
+// erase神坑
+// iter神坑
