@@ -106,13 +106,25 @@ PCB* createProcess(string ID, int priority) {
 }
 
 void deleteProcess(string ID) {
-    for(vector<PCB*>::iterator iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
+    vector<PCB*>::iterator iter;
+    for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
+        cout<<"-- "<<(*iter)->ID<<endl;
+    }
+
+
+    for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();){
         if((*iter)->ID==ID){
             (*iter)->status_code = -1;
             PROCESS_LIST.erase(iter);
             cout<<"The process "<<ID<<" has been deleted!"<<endl;
             break;
         }
+        else{
+            ++iter;
+        }
+    }
+    for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
+        cout<<"-- "<<(*iter)->ID<<endl;
     }
 }
 
@@ -131,19 +143,32 @@ void scheduler(){
 
     max_priority = PROCESS_LIST[0]->priority;
 
-    for(vector<PCB*>::iterator iter=PROCESS_LIST.begin()+1;iter!=PROCESS_LIST.end();iter++){
-        if((*iter)->priority>max_priority){
+    for(vector<PCB*>::iterator iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
+        if((*iter)->priority>max_priority&&((*iter)->status_code==0)){
             target_PCB = iter;
             max_priority = (*iter)->priority;
         }
     }
+    cout<<"????????"<<endl;
 
     // 调度
-    // 状态码 0为就绪 1为阻塞 2为运行 -1为被删除
+    // 状态码 0为就绪 1为阻塞 2为运行 3为被挂起 -1为被删除
     // TODO:当为同一个进程时不必引起调换 另外也要在上面的循环中监测进程是否是阻塞或者挂起状态
-    NOW_PROCESS->status_code = 0;
-    NOW_PROCESS = *target_PCB;
-    NOW_PROCESS->status_code = 2;
+    if(NOW_PROCESS->priority<max_priority&&NOW_PROCESS->status_code!=2) {
+        cout<<"现在更换 "<<NOW_PROCESS->ID;
+        NOW_PROCESS->status_code = 0;
+        NOW_PROCESS = *target_PCB;
+        NOW_PROCESS->status_code = 2;
+        cout<<" 为"<<NOW_PROCESS->ID<<endl;
+
+    }
+        // 如果当前进程被删除 则直接替换
+    else if(NOW_PROCESS->status_code==-1){
+        cout<<"现在更换 "<<NOW_PROCESS->ID;
+        NOW_PROCESS = *target_PCB;
+        NOW_PROCESS->status_code = 2;
+        cout<<" 为"<<NOW_PROCESS->ID<<endl;
+    }
 }
 
 
@@ -151,7 +176,6 @@ void scheduler(){
 int main()
 {
     PCB* initPCB = createProcess("0", 0);
-    PROCESS_LIST.push_back(initPCB);
     NOW_PROCESS = initPCB;
     // 将initPCB的处理时间设为最大值
     initPCB->handling_time = 10000;
@@ -162,12 +186,21 @@ int main()
         string name;
         int priority;
 
+        scheduler();
+
         cin>>command;
+
+        vector<PCB*>::iterator iter;
+        cout<<"当前内存中的所有进程及其优先级为"
+        for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
+            cout<<"-- "<<(*iter)->ID<<" 优先级 "<<(*iter)->priority<<endl;
+        }
 
         // 如果运行结束 那么删除该进程 寻找下一优先的进程
         NOW_PROCESS->handling_time--;
         if(NOW_PROCESS->handling_time==0){
             deleteProcess(NOW_PROCESS->ID);
+            scheduler();
         }
 
 
@@ -175,13 +208,9 @@ int main()
             cin>>name>>priority;
             PCB* newProcess = createProcess(name, priority);
             if(priority>NOW_PROCESS->priority){
-                cout<<"The process "<<NOW_PROCESS->ID<<" is changed to Ready"<<endl;
                 NOW_PROCESS = newProcess;
-                cout<<"The process "<<NOW_PROCESS->ID<<" is running"<<endl;
             }
-            else{
-                cout<<"The process "<<NOW_PROCESS->ID<<" is running"<<endl;
-            }
+            cout<<"The process "<<NOW_PROCESS->ID<<" is running"<<endl;
 
         }
         else if(command=="dl"){
