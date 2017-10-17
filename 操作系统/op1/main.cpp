@@ -140,6 +140,14 @@ public:
             cout<<" The process "<<this->ID<<" is blocked!!!"<<endl;
             // 将该进程插入该资源的等待队列
             insert((*iter), this);
+
+            // 阻塞后 释放已request的资源 预防死锁
+            if(this->other_resources.size()!=0){
+                for(int i=0;i<this->other_resources.size();i++){
+                    release(this->other_resources[i]->RID);
+                }
+            }
+
         }
         scheduler();
     }
@@ -151,12 +159,16 @@ public:
         if((*iter)->waiting_list.size()!=0){
             (*iter)->status = "allocated";
             PCB* highest_process = remove_highest_process_in_queue((*iter)->waiting_list);
-            // TODO： 当进程需要多个资源时 需要修改此处逻辑！
-            highest_process->status_code = 0;
-            highest_process->status_list.pop_back();
+
+            // 进程【不可能】受多个资源的阻塞 直接将其就绪即可
             highest_process->other_resources.push_back((*iter));
+            highest_process->status_list.pop_back();
+            highest_process->status_code = 0;
+
             // 将该资源的阻塞队列中最高优先级的进程提取到就绪队列中
             READY_QUEUE.push_back(highest_process);
+            cout<<"进程 "<<highest_process->ID<<" 已就绪"<<endl;
+
 
             // C++的BUG？ 传入的string类型的ID变乱码导致崩溃
             // 解决：之前传递的不是引用 而是按值传递 相当于没有修改
@@ -180,6 +192,7 @@ PCB* createProcess(string ID, int priority) {
 
 void deleteProcess(string ID) {
     vector<PCB*>::iterator iter;
+    cout<<"删除之前"<<endl;
     for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
         cout<<"-- "<<(*iter)->ID<<endl;
     }
@@ -187,8 +200,14 @@ void deleteProcess(string ID) {
 
     for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();){
         if((*iter)->ID==ID){
-            if((*iter)->other_resources.size()!=0)
-                (*iter)->release((*iter)->other_resources[0]->RID);
+
+            // 若该进程占据资源 则释放
+            if((*iter)->other_resources.size()!=0){
+                for(int i=0;i<(*iter)->other_resources.size();i++){
+                    (*iter)->release((*iter)->other_resources[i]->RID);
+                }
+            }
+
             (*iter)->status_code = -1;
             PROCESS_LIST.erase(iter);
             cout<<"The process "<<ID<<" has been deleted!"<<endl;
@@ -198,6 +217,7 @@ void deleteProcess(string ID) {
             ++iter;
         }
     }
+    cout<<"删除之后"<<endl;
     for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
         cout<<"-- "<<(*iter)->ID<<endl;
     }
@@ -317,6 +337,25 @@ void init(){
     RESOURCE_LIST.push_back(R1);
     RESOURCE_LIST.push_back(R2);
 
+}
+
+
+void timeout(){
+
+    scheduler();
+
+    vector<PCB*>::iterator iter;
+    cout<<"当前内存中的所有进程及其优先级为";
+    for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
+        cout<<"-- "<<(*iter)->ID<<" 优先级 "<<(*iter)->priority<<" 状态 "<<(*iter)->status_code<<endl;
+    }
+
+    // 如果运行时间结束 那么删除该进程 寻找下一优先的进程
+    NOW_PROCESS->handling_time--;
+    if(NOW_PROCESS->handling_time<=0){
+        deleteProcess(NOW_PROCESS->ID);
+        // scheduler();
+    }
 }
 
 int main()

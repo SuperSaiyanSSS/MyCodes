@@ -30,7 +30,7 @@
         <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="162">
-              <caret line="6" column="35" lean-forward="true" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+              <caret line="6" column="35" lean-forward="false" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -39,11 +39,11 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="312">
-              <caret line="393" column="71" lean-forward="true" selection-start-line="393" selection-start-column="71" selection-end-line="393" selection-end-column="71" />
+            <state relative-caret-position="334">
+              <caret line="350" column="5" lean-forward="true" selection-start-line="350" selection-start-column="5" selection-end-line="350" selection-end-column="5" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
-                <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+                <element signature="e#3923#4078#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -52,7 +52,7 @@
       <file leaf-file-name="stl_algobase.h" pinned="false" current-in-tab="false">
         <entry file="file://C:/MinGW/lib/gcc/mingw32/5.3.0/include/c++/bits/stl_algobase.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="171">
+            <state relative-caret-position="483">
               <caret line="381" column="0" lean-forward="false" selection-start-line="381" selection-start-column="0" selection-end-line="381" selection-end-column="0" />
               <folding />
             </state>
@@ -68,6 +68,10 @@
       <find>scheduler</find>
       <find>other_resources</find>
       <find>deleteProcess</find>
+      <find>insert</find>
+      <find>死锁</find>
+      <find>remove_highest_process_in_queue</find>
+      <find>被</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -314,12 +318,14 @@
       <workItem from="1507991355308" duration="233000" />
       <workItem from="1508033285040" duration="1791000" />
       <workItem from="1508037190543" duration="192000" />
-      <workItem from="1508037461588" duration="14474000" />
+      <workItem from="1508037461588" duration="15104000" />
+      <workItem from="1508161451188" duration="890000" />
+      <workItem from="1508229129537" duration="3209000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24513000" />
+    <option name="totallyTimeSpent" value="29242000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1924" height="1048" extended-state="0" />
@@ -353,13 +359,67 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="7" />
+      <option name="time" value="8" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="6" column="35" lean-forward="false" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#3923#4078#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/MinGW/lib/gcc/mingw32/5.3.0/include/c++/bits/stl_algobase.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10287">
+          <caret line="381" column="0" lean-forward="false" selection-start-line="381" selection-start-column="0" selection-end-line="381" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="6" column="35" lean-forward="true" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#3923#4078#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/MinGW/lib/gcc/mingw32/5.3.0/include/c++/bits/stl_algobase.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="10287">
+          <caret line="381" column="0" lean-forward="false" selection-start-line="381" selection-start-column="0" selection-end-line="381" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
@@ -372,7 +432,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -391,7 +451,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -418,7 +478,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -437,7 +497,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -456,7 +516,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -475,7 +535,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -494,7 +554,7 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -516,7 +576,7 @@
     </entry>
     <entry file="file://C:/MinGW/lib/gcc/mingw32/5.3.0/include/c++/bits/stl_algobase.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="171">
+        <state relative-caret-position="483">
           <caret line="381" column="0" lean-forward="false" selection-start-line="381" selection-start-column="0" selection-end-line="381" selection-end-column="0" />
           <folding />
         </state>
@@ -525,18 +585,18 @@
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
-          <caret line="6" column="35" lean-forward="true" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+          <caret line="6" column="35" lean-forward="false" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="393" column="71" lean-forward="true" selection-start-line="393" selection-start-column="71" selection-end-line="393" selection-end-column="71" />
+        <state relative-caret-position="334">
+          <caret line="350" column="5" lean-forward="true" selection-start-line="350" selection-start-column="5" selection-end-line="350" selection-end-column="5" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
-            <marker date="1508068493056" expanded="false" signature="3660:3771" ph="{...}" />
+            <element signature="e#3923#4078#0" expanded="false" />
           </folding>
         </state>
       </provider>
