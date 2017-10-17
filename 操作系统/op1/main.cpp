@@ -6,6 +6,14 @@
 
 using namespace std;
 
+// 线程1接收用户输入 产生中断
+DWORD WINAPI ThreadProc1(LPVOID lpParameter);
+// 线程2为系统自动处理进程调度 产生时钟中断
+DWORD WINAPI ThreadProc2(LPVOID lpParameter);
+
+// 关机
+int power_off;
+
 class PCB;
 class RCB;
 // 全局变量
@@ -325,6 +333,8 @@ void scheduler(){
 
 void init(){
 
+    // 开机
+    power_off = 0;
     // 创建init进程
     PCB* initPCB = createProcess("0", 0);
     NOW_PROCESS = initPCB;
@@ -342,25 +352,34 @@ void init(){
 
 void timeout(){
 
-    scheduler();
+    while(1) {
+        if(power_off==1) {
+            break;
+        }
+        // 每3秒产生一次系统时钟中断
+        Sleep(3000);
 
-    vector<PCB*>::iterator iter;
-    cout<<"当前内存中的所有进程及其优先级为";
-    for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
-        cout<<"-- "<<(*iter)->ID<<" 优先级 "<<(*iter)->priority<<" 状态 "<<(*iter)->status_code<<endl;
-    }
+        scheduler();
 
-    // 如果运行时间结束 那么删除该进程 寻找下一优先的进程
-    NOW_PROCESS->handling_time--;
-    if(NOW_PROCESS->handling_time<=0){
-        deleteProcess(NOW_PROCESS->ID);
-        // scheduler();
+        vector<PCB *>::iterator iter;
+        cout << "当前内存中的所有进程及其优先级为";
+        for (iter = PROCESS_LIST.begin(); iter != PROCESS_LIST.end(); iter++) {
+            cout << "-- " << (*iter)->ID << " 优先级 " << (*iter)->priority << " 状态 " << (*iter)->status_code << endl;
+        }
+
+        // 如果运行时间结束 那么删除该进程 寻找下一优先的进程
+        NOW_PROCESS->handling_time--;
+        if (NOW_PROCESS->handling_time <= 0) {
+            cout<<"WARNING!【【【"<<NOW_PROCESS->ID<<"】】】已运行结束！"<<endl;
+            deleteProcess(NOW_PROCESS->ID);
+            // scheduler();
+        }
+
+        cout<<"当前运行进程: "<<NOW_PROCESS->ID<<endl;
     }
 }
 
-int main()
-{
-    init();
+void user_process(){
 
     while(1){
         Sleep(500);
@@ -380,11 +399,11 @@ int main()
         NOW_PROCESS->handling_time--;
         if(NOW_PROCESS->handling_time<=0){
             deleteProcess(NOW_PROCESS->ID);
-           // scheduler();
+            // scheduler();
         }
 
         cout<<"当前运行进程："<<NOW_PROCESS->ID<<endl;
-
+     //   cout<<">>";
         cin>>command;
 
         if(command=="cr"){
@@ -420,7 +439,11 @@ int main()
             }
         }
         else if(command=="bk"){
+            power_off = 1;
             break;
+        }
+        else if(command=="to"){
+            scheduler();
         }
         else{
             cout<<"非法操作！"<<endl;
@@ -436,7 +459,38 @@ int main()
 
     }
 
+    cout << "成功退出" << endl;
+}
 
+DWORD WINAPI ThreadProc1(LPVOID lpParameter)
+{
+    timeout();
+    return 0;
+}
+
+DWORD WINAPI ThreadProc2(LPVOID lpParameter)
+{
+    user_process();
+    return 0;
+}
+
+int main()
+{
+    // TODO: I/O 中断  各种队列
+    init();
+
+    HANDLE handle1=CreateThread(NULL,0,ThreadProc1,NULL,0,NULL);
+    HANDLE handle2=CreateThread(NULL,0,ThreadProc2,NULL,0,NULL);
+    CloseHandle(handle1);
+    CloseHandle(handle2);
+
+    // 控制主进程运行时间
+    while(1) {
+        Sleep(2000);
+        if(power_off==1){
+            break;
+        }
+    }
     cout << "成功退出" << endl;
     return 0;
 }
