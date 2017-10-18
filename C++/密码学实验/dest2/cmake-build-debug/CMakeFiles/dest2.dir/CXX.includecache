@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+H:/C/clion/workplace/dest2/main.cpp
+iostream
+-
+bitset
+-
+sstream
+-
+fstream
+-
+cassert
+-
+windows.h
+-
+
