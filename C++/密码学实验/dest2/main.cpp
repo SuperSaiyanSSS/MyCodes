@@ -25,7 +25,7 @@ bitset<32> S_flex;
 
 // 上一次加密后的密文
 bitset<64> last_encryptedtext;
-
+bitset<64> last_encryptedtext2;
 
 
 // 次方函数 C++自带的次方函数有问题
@@ -308,7 +308,7 @@ void getKey(string key){
 // DES加密函数
 void encrypt(){
 
- //   cout<<"ming wen is "<<plaintext<<endl;
+    cout<<"ming wen is "<<plaintext<<endl;
     for(int i=0;i<32;i++){
         plaintext_L[i] = plaintext[i];
         plaintext_R[i] = plaintext[i+32];
@@ -801,16 +801,19 @@ int main() {
             // CBC模式独有的异或操作
             if(i!=0) {
                 for (int count_i = 0; count_i < plaintext.size(); count_i++) {
-                    plaintext[i] = last_encryptedtext[i] xor plaintext[i];
+                    plaintext[count_i] = last_encryptedtext[count_i] ^ plaintext[count_i];
+                }
+                for(int count_i=0;count_i<plaintext.size();count_i++) {
+                    last_encryptedtext2[count_i] = last_encryptedtext[count_i];
                 }
             }
+            cout<<"lalala---"<<plaintext<<endl;
 
             encrypt();
 
             for(int count_i=0;count_i<plaintext.size();count_i++) {
                 last_encryptedtext[count_i] = plaintext[count_i];
             }
-
 
             //存储密文
             cout << plaintext.to_string() << endl;
@@ -819,16 +822,13 @@ int main() {
             file1_e.write((char *) &plaintext, sizeof(plaintext));
             file1_e.close();
 
-            if(i!=0) {
-                for (int count_i = 0; count_i < plaintext.size(); count_i++) {
-                    plaintext[i] = last_encryptedtext[i] xor plaintext[i];
-                }
-            }
 
             decrypt();
 
-            for(int count_i=0;count_i<plaintext.size();count_i++) {
-                last_encryptedtext[count_i] = plaintext[count_i];
+            if(i!=0) {
+                for (int count_i = 0; count_i < plaintext.size(); count_i++) {
+                    plaintext[count_i] = last_encryptedtext2[count_i] ^ plaintext[count_i];
+                }
             }
 
             cout << plaintext.to_string() << endl;
@@ -896,9 +896,13 @@ int main() {
             // CBC模式独有的异或操作
             if(i!=0) {
                 for (int count_i = 0; count_i < plaintext.size(); count_i++) {
-                    plaintext[i] = last_encryptedtext[i] xor plaintext[i];
+                    plaintext[count_i] = last_encryptedtext[count_i] ^ plaintext[count_i];
+                }
+                for(int count_i=0;count_i<plaintext.size();count_i++) {
+                    last_encryptedtext2[count_i] = last_encryptedtext[count_i];
                 }
             }
+            cout<<"lalala---"<<plaintext<<endl;
 
             encrypt();
 
@@ -921,6 +925,12 @@ int main() {
             }
 
             decrypt();
+
+            if(i!=0) {
+                for (int count_i = 0; count_i < plaintext.size(); count_i++) {
+                    plaintext[count_i] = last_encryptedtext2[count_i] ^ plaintext[count_i];
+                }
+            }
 
             for(int count_i=0;count_i<plaintext.size();count_i++) {
                 last_encryptedtext[count_i] = plaintext[count_i];
@@ -967,6 +977,8 @@ int main() {
     else{
         cout<<"非法输入！"<<endl;
     }
+
+    cout<<"已结束！"<<endl;
 
     getchar();
     getchar();
