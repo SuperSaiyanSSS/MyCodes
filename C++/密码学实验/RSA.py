@@ -2,16 +2,22 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 import random
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
 
 def gcd(a, b):
-    if a < b:
-        temp = a
+    while 1:
+        if a < b:
+            temp = a
+            a = b
+            b = temp
+        if b == 0:
+            return a
+        c = a % b
         a = b
-        b = temp
-    if b == 0:
-        return a
-    c = a % b
-    return gcd(b, c)
+        b = c
 
 
 def get_random_b(fai_n):
@@ -24,13 +30,31 @@ def get_random_b(fai_n):
     return b
 
 
+def extgcd(a, b, x_list, y_list):
+    if b==0:
+        x_list[0] = 1
+        y_list[0] = 0
+        return a
+    else:
+        extgcd(b, a%b, y_list, x_list)
+        y_list[0] -= (a/b) * x_list[0]
+
+
 def get_inverse(t, p):
+    print("开始寻找元素的逆。。")
+    print(p)
     inverse = 1
-    for i in range(p)[1:]:
-        if (t*i) % p == 1:
-            inverse = i
+    count = p
+    while count!=0:
+        if (t*count) % p == 1:
+            inverse = count
             break
-    print(t, "的逆为", inverse)
+        count -= 1
+    # for i in range(p)[1:]:
+    #     if (t*i) % p == 1:
+    #         inverse = i
+    #         break
+    print(t, "的乘法逆为", inverse)
     return inverse
 
 
@@ -70,32 +94,34 @@ def pseudo_prime_test(n):
             count += 1
     k = count
     a = random.randint(1, n-1)
-    b = a**m % n
+
+    b = fast_exponentiation_algorithm(a, m, n)
+    #b = a**m % n
     if b % n == 1:
         return True
     for i in range(k):
-        if b % n == -1 or b % n == n-1:
+        if b % n == -1:
             return True
         else:
             b = b**2 % n
     return False
 
 
-
 def main():
 
-    plaintext = int(raw_input("请输入要加密的明文:"))
+    plaintext = int(raw_input("请输入要加密的数字明文:"))
 
-    # 生成大素数
     while True:
-        big_number = random.randint(1000, 2000)
-        if big_number%2==1:
+        big_number = random.randint(10000000000000000, 90000000000000000)
+        if big_number % 2 == 1:
+            print("p:", big_number)
             if pseudo_prime_test(big_number):
                 break
     p = big_number
     while True:
-        big_number = random.randint(1000, 2000)
-        if big_number%2==1:
+        big_number = random.randint(10000000000000000, 90000000000000000)
+        if big_number % 2 == 1:
+            print("q:", big_number)
             if pseudo_prime_test(big_number):
                 break
     q = big_number
@@ -103,19 +129,24 @@ def main():
     n = p*q
     fai_n = (p-1)*(q-1)
     b = get_random_b(fai_n)
-    a = get_inverse(b, fai_n)
+    a_list = [1]
+    x_list = [1]
+    extgcd(b, fai_n, a_list , x_list)
+    a = a_list[0]
+    if a < 0:
+        a += fai_n
     print("公钥为 (", str(n), str(b), ")")
     print("私钥为 (", str(p), str(q), str(a), ")")
 
-
-    aa = encrypt(plaintext
-                 , b, n)
+    aa = encrypt(plaintext, b, n)
     bb = decrypt(aa, a, n)
-
 
     print("经过RSA算法后， 密文为", str(aa))
     print("经过RSA算法后， 明文为", str(bb))
 
 
 if __name__ == '__main__':
+    """
+    @ author: 150420120
+    """
     main()

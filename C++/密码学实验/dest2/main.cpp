@@ -8,6 +8,26 @@
 using namespace std;
 
 
+bitset<64> plaintext;
+bitset<32> plaintext_L;
+bitset<32> plaintext_R;
+
+bitset<64> ciphertext;
+
+// test[16]存储16轮每轮的轮密钥
+bitset<48> test[16];
+
+// 64位密钥由密钥次序建立的54位真·种子密钥
+bitset<54>key54;
+
+// S盒映射P盒置换后得到的32位密文
+bitset<32> S_flex;
+
+// 上一次加密后的密文
+bitset<64> last_encryptedtext;
+
+
+
 // 次方函数 C++自带的次方函数有问题
 int cifang(int base, int cishu){
     int num =1;
@@ -117,7 +137,7 @@ int shiftBits[] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
 
 
 // 获取每轮的轮密钥
-bitset<48>* getEachK(bitset<54> key54, bitset<48> eachK[]){
+bitset<48>* getEachK(bitset<54> key54){
 
     //分为初始的A B序列密钥
     bitset<28>key28_A, key28_B;
@@ -153,10 +173,14 @@ bitset<48>* getEachK(bitset<54> key54, bitset<48> eachK[]){
             thisK[k] = A_B[PC_2[k]];
         }
 
-        eachK[i] = thisK;
+        for(int j=0;j<thisK.size();j++){
+            test[i][j] = thisK[j];
+        }
+
+      //  test[i] = thisK;
     }
 
-    return eachK;
+    return test;
 
 }
 
@@ -256,25 +280,6 @@ void readTxt(string file)
 
 
 
-bitset<64> plaintext;
-bitset<32> plaintext_L;
-bitset<32> plaintext_R;
-
-bitset<64> ciphertext;
-
-// test[16]存储16轮每轮的轮密钥
-bitset<48> test[16];
-
-// 64位密钥由密钥次序建立的54位真·种子密钥
-bitset<54>key54;
-
-// S盒映射P盒置换后得到的32位密文
-bitset<32> S_flex;
-
-// 上一次加密后的密文
-bitset<64> last_encryptedtext;
-
-
 // 获取密钥 存储在key54中
 void getKey(string key){
 
@@ -296,13 +301,14 @@ void getKey(string key){
     cout<<"转化得到的真·种子密钥为 "<<key54<<endl;
 
     //test[16]存储16轮每轮的轮密钥
-    getEachK(key54, test);
+    getEachK(key54);
+
 }
 
 // DES加密函数
 void encrypt(){
 
-    cout<<"ming wen is "<<plaintext<<endl;
+ //   cout<<"ming wen is "<<plaintext<<endl;
     for(int i=0;i<32;i++){
         plaintext_L[i] = plaintext[i];
         plaintext_R[i] = plaintext[i+32];
@@ -368,11 +374,11 @@ void encrypt(){
         //      cout<<plaintext_R<<endl;
 
     }
-    cout<<endl;
-    cout<<"@@@@@@@@@@@@@@@@@@@"<<endl;
-    cout<<plaintext_L<<plaintext_R<<endl;
+ //   cout<<endl;
+ //   cout<<"@@@@@@@@@@@@@@@@@@@"<<endl;
+ //   cout<<plaintext_L<<plaintext_R<<endl;
 
-    cout<<"-------------------------"<<endl;
+//    cout<<"-------------------------"<<endl;
 
     //将密文存储至全局变量
     for(int kk=0;kk<32;kk++){
@@ -467,6 +473,7 @@ void test2(int is_first){
 
     string filename;
     if(is_first){
+        DeleteFile("D:\\for_test.txt");
         filename = "D:\\for_test.txt";
     }
     else{
@@ -528,26 +535,39 @@ void test2(int is_first){
     file1_e.close();
 
     if(!is_first){
-        string t,ans,ans2;
-        int i;
-        freopen("D:\\for_test.txt","r",stdin);
-        char c;
-        while(scanf("%c",&c)!=EOF) ans+=c;
-        fclose(stdin);
-        freopen("D:\\loop_test.txt","r",stdin);
-        while(scanf("%c",&c)!=EOF) ans2+=c;;
-        fclose(stdin);
-        if(ans.size()!=ans2.size()){cout<<"口令不符！登陆失败！启动自毁程序。。。\n";return;}
-        for(i=0;i<ans.size();i++)
-            if(ans[i]!=ans2[i]){cout<<"口令不符！登陆失败！启动自毁程序。。。\n";return;}
-        cout<<"口令相同！登陆成功\n";
+        //读取之前的密文
+        ifstream t1("D:\\for_test.txt");
+        stringstream buffer1;
+        buffer1 << t1.rdbuf();
+        string contents1(buffer1.str());
+
+        ifstream t2("D:\\loop_test.txt");
+        stringstream buffer2;
+        buffer2 << t2.rdbuf();
+        string contents2(buffer2.str());
+
+        if(contents1.size()==contents2.size()){
+            for(int i=0;i<contents1.size();i++){
+                if(contents1[i]!=contents2[i]){
+                    cout<<"失败！！！"<<endl;
+                    return;
+                }
+            }
+            cout<<"成功！！！"<<endl;
+            return;
+        }
+        else{
+            cout<<"失败！！！"<<endl;
+            return;
+        }
+
     }
+
 
 
 }
 
 int main() {
-
 
     cout<<"----150420120 王晓玮----"<<endl;
     cout<<"要加密的图片的路径是 D:/hit.bmp"<<endl;
@@ -567,8 +587,6 @@ int main() {
     if(choose==5) {
         int first = 1;
         while(1) {
-            cin.clear();
-            cin.sync();   //或者用cin.ignore();
             if(first) {
                 cout << "初次登陆，请设置口令" << endl;
                 cin >> key;
@@ -577,13 +595,8 @@ int main() {
                 first = 0;
             }
             else{
-                cin.clear();
-                cin.sync();   //或者用cin.ignore();
-
-
                 cout<<"请验证您的口令是否正确！输入吧"<<endl;
                 cin >> key;
-                cout<<"0000000001"<<endl;
                 cout<<key<<endl;
                 Sleep(2000);
                 getKey(key);
@@ -591,20 +604,9 @@ int main() {
             }
             Sleep(2000);
             cout<<"是否结束？结束请按1，否则其他"<<endl;
-    //        cin.clear();
-      //      cin.sync();   //或者用cin.ignore();
-
             cin>>end1;
             if(end1=="1"){
                 return 0;
-            }
-            else{
-                cout<<"0000000002"<<endl;
-                cout<<end1<<endl;
-                Sleep(2000);
-              //  cin.ignore(numeric_limits<std::streamsize>::max()); //清除cin里所有内容
-              //  cin.clear();
-              //  cin.sync();   //或者用cin.ignore();
             }
         }
     }
@@ -966,9 +968,8 @@ int main() {
         cout<<"非法输入！"<<endl;
     }
 
-//    plaintext = 3;
-//    encrypt();
-//    decrypt();
-
+    getchar();
+    getchar();
+    getchar();
     return 0;
 }
