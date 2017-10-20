@@ -29,6 +29,7 @@ vector<PCB*> READY_QUEUE;
 // 阻塞队列（状态值为3）
 vector<PCB*> BLOCKING_QUEUE;
 
+
 void insert(PCB* , RCB* );
 void insert(RCB* , PCB* );
 void remove(vector<PCB*>& list, PCB* SELF);
@@ -77,18 +78,23 @@ public:
     // TODO..假设只有一个需要的RCB
     vector<RCB*> status_list;
 
-    // 父进程
-    PCB* father;
-    // 子进程中最大的儿子
-    PCB* bigson;
-    // 兄弟进程
-    PCB* brother;
+
+    vector<PCB*> son_process_list;
+
+//    // 父进程
+//    PCB* father;
+//    // 子进程中最大的儿子
+//    PCB* bigson;
+//    // 兄弟进程
+//    PCB* brother;
 
     // 优先级
     int priority;
 
     // 处理时间
     int handling_time;
+
+
 
     PCB() {
         ID = "0";
@@ -97,12 +103,12 @@ public:
         status_code = 0;
        // status_list = NULL;
 
-        father = NULL;
-        bigson = NULL;
-        brother = NULL;
+//        father = NULL;
+//        bigson = NULL;
+//        brother = NULL;
 
         priority = 0;
-        handling_time = 3;
+        handling_time = 30;
 
     }
 
@@ -113,13 +119,13 @@ public:
         status_code = 0;
        // status_list = NULL;
 
-        father = NULL;
-        bigson = NULL;
-        brother = NULL;
+//        father = NULL;
+//        bigson = NULL;
+//        brother = NULL;
 
         this->priority = priority;
 
-        handling_time = 10;
+        handling_time = 20;
     }
 
     static vector<RCB*>::iterator get_RCB(int RID){
@@ -195,6 +201,10 @@ public:
 PCB* createProcess(string ID, int priority) {
     PCB* newProcess = new PCB(ID, priority);
     PROCESS_LIST.push_back(newProcess);
+    if(ID!="0") {
+        cout<<"当前的父进程为"<<NOW_PROCESS->ID<<endl;
+        NOW_PROCESS->son_process_list.push_back(newProcess);
+    }
     return newProcess;
 }
 
@@ -205,9 +215,16 @@ void deleteProcess(string ID) {
         cout<<"-- "<<(*iter)->ID<<endl;
     }
 
-
     for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();){
         if((*iter)->ID==ID){
+
+            cout<<ID<<endl;
+            cout<<(*iter)->son_process_list.size()<<endl;
+            cout<<"111正在递归查找"<<(*iter)->ID<<"的子进程。。。"<<endl;
+            for(int i=0;i<(*iter)->son_process_list.size();i++){
+                cout<<"正在递归查找"<<(*iter)->son_process_list[i]->ID<<"的子进程。。。"<<endl;
+                deleteProcess((*iter)->son_process_list[i]->ID);
+            }
 
             // 若该进程占据资源 则释放
             if((*iter)->other_resources.size()!=0){
@@ -229,8 +246,9 @@ void deleteProcess(string ID) {
     for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();iter++){
         cout<<"-- "<<(*iter)->ID<<endl;
     }
+    return;
 
-    scheduler();
+  //  scheduler();
 }
 
 
@@ -415,11 +433,10 @@ void user_process(){
             }
             NOW_PROCESS->status_code = 2;
             cout<<"The process "<<NOW_PROCESS->ID<<" is running"<<endl;
-
         }
         else if(command=="dl"){
             cin>>name;
-            deleteProcess(NOW_PROCESS->ID);
+            deleteProcess(name);
         }
 
         else if(command=="rq"){
@@ -442,7 +459,7 @@ void user_process(){
             power_off = 1;
             break;
         }
-        else if(command=="to"){
+        else if(command=="timeout"){
             scheduler();
         }
         else{
@@ -476,7 +493,7 @@ DWORD WINAPI ThreadProc2(LPVOID lpParameter)
 
 int main()
 {
-    // TODO: I/O 中断  各种队列
+    // TODO: I/O  各种队列
     init();
 
     HANDLE handle1=CreateThread(NULL,0,ThreadProc1,NULL,0,NULL);
