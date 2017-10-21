@@ -328,17 +328,89 @@ int mm_request_FF(int n){
             break;
         }
     }
+    if(loss_start!=-1){
+        cout<<"首次适应算法分配出去的起始地址为"<<loss_start<<" 大小为"<<n<<endl;
+        blank_table->display();
+        // 插入忙碌表中
+        busy_table->insert(loss_start, n);
 
-    blank_table->display();
-    // 插入忙碌表中
-    busy_table->insert(loss_start, n);
-
-   // busy_table->display();
-
-    cout<<"分配出去的起始地址为"<<loss_start<<" 大小为"<<n<<endl;
+       // busy_table->display();
+    }
     return loss_start;
 }
 
+int mm_request_BF(int n){
+    int loss_start = -1;
+    //检查第一个大于等于该大小的空闲区
+    int i;
+    int min_surplus = MMSIZE;
+    int min_pos = 0;
+    for(i=0;i<blank_table->size.size();i++){
+        if(blank_table->size[i]>=n){
+            if(blank_table->size[i] - n < min_surplus){
+                min_pos = i;
+                min_surplus = blank_table->size[i] - n;
+            }
+        }
+    }
+    if(min_surplus!=MMSIZE){
+        loss_start = blank_table->start_address[min_pos];
+        // 若分割后的区域小于最小区域，则把整个空闲区都分出去
+        if(blank_table->size[min_pos]-n <= MINSIZE){
+            blank_table->erase(min_pos);
+        }// 否则 剩下的仍然留在空闲表中
+        else{
+            blank_table->size[min_pos] = blank_table->size[min_pos]- n;
+            blank_table->start_address[min_pos] += n;
+        }
+    }
+
+    if(loss_start!=-1){
+        cout<<"最佳适应算法分配出去的起始地址为"<<loss_start<<" 大小为"<<n<<endl;
+        blank_table->display();
+        // 插入忙碌表中
+        busy_table->insert(loss_start, n);
+
+        // busy_table->display();
+    }
+    return loss_start;
+}
+
+int mm_request_WF(int n){
+    int loss_start = -1;
+    //检查第一个大于等于该大小的空闲区
+    int i;
+    int max_surplus = 0;
+    int max_pos = 0;
+    for(i=0;i<blank_table->size.size();i++){
+        if(blank_table->size[i]>=n){
+            if(blank_table->size[i] - n > max_surplus){
+                max_pos = i;
+                max_surplus = blank_table->size[i] - n;
+            }
+        }
+    }
+    if(max_surplus!=0){
+        loss_start = blank_table->start_address[max_pos];
+        // 若分割后的区域小于最小区域，则把整个空闲区都分出去
+        if(blank_table->size[max_pos]-n <= MINSIZE){
+            blank_table->erase(max_pos);
+        }// 否则 剩下的仍然留在空闲表中
+        else{
+            blank_table->size[max_pos] = blank_table->size[max_pos]- n;
+            blank_table->start_address[max_pos] += n;
+        }
+    }
+
+    if(loss_start!=-1){
+        cout<<"最坏适应算法分配出去的起始地址为"<<loss_start<<" 大小为"<<n<<endl;
+        blank_table->display();
+        // 插入忙碌表中
+        busy_table->insert(loss_start, n);
+
+    }
+    return loss_start;
+}
 // 用于随机归还
 int mm_release(int p){
     // 删除忙碌表中的
@@ -390,6 +462,47 @@ int mm_release(int p){
     blank_table->display();
 }
 
+double get_utilization_rate_of_memory(){
+    double all_block_num = 0;
+    for(int i=0;i<blank_table->size.size();i++){
+        all_block_num += blank_table->size[i];
+    }
+    return (MMSIZE-all_block_num)/MMSIZE;
+}
+
+void manage(int sim_step, int type){
+
+    for(int i=0;i<sim_step;i++) {
+        int n;
+        if(type==0) {
+            do {
+                // 获取请求空间的大小
+                n = rand() % 30;
+
+            } while (mm_request_FF(n) != -1);
+        }
+        if(type==1) {
+            do {
+                // 获取请求空间的大小
+                n = rand() % 30;
+
+            } while (mm_request_BF(n) != -1);
+        }
+        if(type==2) {
+            do {
+                // 获取请求空间的大小
+                n = rand() % 30;
+
+            } while (mm_request_WF(n) != -1);
+        }
+
+       // blank_table->display();
+        mm_release(blank_table->size.size()-1);
+    }
+
+    cout<<get_utilization_rate_of_memory()<<endl;
+}
+
 int main() {
     blank_table = new BlankPartitionTable();
     busy_table = new HasRequestedTable();
@@ -399,10 +512,10 @@ int main() {
 
     mem_init();
     blank_table->display();
-    mm_request_FF(35);
 
     cout<<"----------------------------"<<endl;
-    blank_table->display();
-    mm_release(busy_table->size.size()-1);
+    // 0为FF 1为BF 2为WF
+    manage(5, 0);
+
     return 0;
 }
