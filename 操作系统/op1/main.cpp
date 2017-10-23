@@ -16,6 +16,7 @@ int power_off;
 
 class PCB;
 class RCB;
+class IO;
 // 全局变量
 // 所有进程列表
 vector<PCB*> PROCESS_LIST;
@@ -23,6 +24,8 @@ vector<PCB*> PROCESS_LIST;
 PCB* NOW_PROCESS;
 // 所有资源块列表
 vector<RCB*> RESOURCE_LIST;
+// IO设备
+IO* IO_RESOURCE;
 
 // 就绪队列（状态值为0）
 vector<PCB*> READY_QUEUE;
@@ -38,6 +41,18 @@ void scheduler();
 PCB* remove_highest_process_in_queue(vector<PCB*>& list);
 
 
+class IO{
+public:
+    int name;
+    string status;
+    vector<PCB*> waiting_list;
+    PCB* order;
+
+    IO(){
+        name = 10;
+        status = "free";
+    }
+};
 
 // 资源控制块
 class RCB {
@@ -78,15 +93,7 @@ public:
     // TODO..假设只有一个需要的RCB
     vector<RCB*> status_list;
 
-
     vector<PCB*> son_process_list;
-
-//    // 父进程
-//    PCB* father;
-//    // 子进程中最大的儿子
-//    PCB* bigson;
-//    // 兄弟进程
-//    PCB* brother;
 
     // 优先级
     int priority;
@@ -94,37 +101,19 @@ public:
     // 处理时间
     int handling_time;
 
-
-
     PCB() {
         ID = "0";
         memory = 0;
-       // other_resources = NULL;
         status_code = 0;
-       // status_list = NULL;
-
-//        father = NULL;
-//        bigson = NULL;
-//        brother = NULL;
-
         priority = 0;
         handling_time = 30;
-
     }
 
     PCB(string ID, int priority) {
         this->ID = ID;
         memory = 0;
-     //   other_resources = NULL;
         status_code = 0;
-       // status_list = NULL;
-
-//        father = NULL;
-//        bigson = NULL;
-//        brother = NULL;
-
         this->priority = priority;
-
         handling_time = 20;
     }
 
@@ -195,6 +184,53 @@ public:
 
     }
 
+    void request_IO(){
+
+        if(IO_RESOURCE->status=="free"){
+            IO_RESOURCE->status = "allocated";
+            IO_RESOURCE->order = this;
+
+        }
+        else{
+            // 若该资源被占用 则该进程I/O阻塞
+            this->status_code = 3;
+            cout<<" The process "<<this->ID<<" is I/O blocked!!!"<<endl;
+            // 将该进程插入该资源的等待队列
+            PCB* this_p = this;
+            IO_RESOURCE->waiting_list.push_back(this_p);
+
+            // 阻塞后 释放已request的资源 预防死锁
+            if(this->other_resources.size()!=0){
+                for(int i=0;i<this->other_resources.size();i++){
+                    release(this->other_resources[i]->RID);
+                }
+            }
+
+        }
+        scheduler();
+    }
+
+    void release_IO(){
+
+        if(IO_RESOURCE->waiting_list.size()!=0){
+            IO_RESOURCE->status = "allocated";
+            PCB* highest_process = remove_highest_process_in_queue(IO_RESOURCE->waiting_list);
+            IO_RESOURCE->order = highest_process;
+            // 进程【不可能】受多个资源的阻塞 直接将其就绪即可
+            highest_process->status_code = 0;
+
+            // 将该资源的阻塞队列中最高优先级的进程提取到就绪队列中
+            READY_QUEUE.push_back(highest_process);
+            cout<<"进程 "<<highest_process->ID<<" 已就绪"<<endl;
+
+        }
+        else{
+            IO_RESOURCE->status = "free";
+            cout<<"资源 I/O 已自由"<<endl;
+        }
+        scheduler();
+    }
+
 };
 
 
@@ -215,8 +251,14 @@ void deleteProcess(string ID) {
         cout<<"-- "<<(*iter)->ID<<endl;
     }
 
+
     for(iter=PROCESS_LIST.begin();iter!=PROCESS_LIST.end();){
         if((*iter)->ID==ID){
+
+            // 释放I/O资源
+            if(IO_RESOURCE->status=="allocated"&&IO_RESOURCE->order==(*iter)){
+                (*iter)->release_IO();
+            }
 
             cout<<ID<<endl;
             cout<<(*iter)->son_process_list.size()<<endl;
@@ -362,6 +404,7 @@ void init(){
     // 初始化资源块
     RCB* R1 = new RCB(1);
     RCB* R2 = new RCB(2);
+    IO_RESOURCE = new IO();
     RESOURCE_LIST.push_back(R1);
     RESOURCE_LIST.push_back(R2);
 
@@ -374,8 +417,8 @@ void timeout(){
         if(power_off==1) {
             break;
         }
-        // 每3秒产生一次系统时钟中断
-        Sleep(3000);
+        // 每6秒产生一次系统时钟中断
+        Sleep(6000);
 
         scheduler();
 
@@ -442,12 +485,20 @@ void user_process(){
         else if(command=="rq"){
             int RID;
             cin>>RID;
-            NOW_PROCESS->request(RID);
+            if(RID==10){
+                NOW_PROCESS->request_IO();
+            }
+            else {
+                NOW_PROCESS->request(RID);
+            }
         }
         else if(command=="rl"){
             int RID;
             cin>>RID;
-            if(NOW_PROCESS->other_resources.size()!=0){
+            if(RID==10){
+                NOW_PROCESS->release_IO();
+            }
+            else if(NOW_PROCESS->other_resources.size()!=0){
                 NOW_PROCESS->release(RID);
             }
             else{
@@ -493,7 +544,20 @@ DWORD WINAPI ThreadProc2(LPVOID lpParameter)
 
 int main()
 {
-    // TODO: I/O  各种队列
+    // TODO:  各种队列
+    cout<<"-------------------------------------------------"<<endl;
+    cout<<"| 现有资源块，名称分别为1，2                      |"<<endl;
+    cout<<"| 现有I/O设备，名称为10                          |"<<endl;
+    cout<<"| 输入cr a 10，表示创建名为a的进程，优先级为10     |"<<endl;
+    cout<<"| 输入rq 1，表示申请资源块1                       |"<<endl;
+    cout<<"| 输入rl 1，表示释放资源块2                       |"<<endl;
+    cout<<"| 输入dl a，表示删除a进程及其子孙进程              |"<<endl;
+    cout<<"| 输入bk，表示退出当前程序                        |"<<endl;
+    cout<<"| 每隔6秒，系统将产生一次时钟中断，即时间片为6秒   |"<<endl;
+    cout<<"| 除0进程外，进程的处理时间为20个时间片，到时结束  |"<<endl;
+    cout<<"|                                                  |"<<endl;
+    cout<<"|                        —— by SuperSaiyan Goku |"<<endl;
+    cout<<"-------------------------------------------------"<<endl;
     init();
 
     HANDLE handle1=CreateThread(NULL,0,ThreadProc1,NULL,0,NULL);
