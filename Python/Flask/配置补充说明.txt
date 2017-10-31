@@ -1,0 +1,16 @@
+配置的一些坑
+在varys/lib/varys/etc下的base.py中，
+MYSQL_ACCESS_URL应改为自己用户名+密码的链接，且数据库名称也要修改
+如：
+MYSQL_ACCESS_URL = 'mysql://【root】:【w123qe】@127.0.0.1:3306/【varys4】?charset=utf8'
+下面的dbuser dbpasswd修改为自己的数据库用户名和密码
+dbname要修改的和MYSQL_ACCESS_URL中的数据库名称一样
+
+启动后点击页面的Query，查询某邮箱会报错：
+
+KeyError: ‘SQLALCHEMY_TRACK_MODIFICATIONS’
+
+原因是flask-sqlalchemy 版本过高，应回退到2.0版本
+命令：pip install flask-sqlalchemy==2.0
+
+readme.md中celery -A worker varys.celery -l INFO # 开启任务池 命令有错，应在varys/lib下的终端输入celery -A varys.celery worker -l INFO
