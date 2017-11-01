@@ -50,6 +50,7 @@ public:
 
     void display(){
         cout<<"空闲表如下"<<endl;
+        cout<<"序号 起始地址 大小"<<endl;
         for(int i=0;i<size.size();i++){
             cout<<number[i]<<" "<<start_address[i]<<" "<<size[i]<<endl;
         }
@@ -118,6 +119,7 @@ public:
 
     void display(){
         cout<<"忙碌表如下"<<endl;
+        cout<<"序号 起始地址 大小"<<endl;
         for(int i=0;i<size.size();i++){
             cout<<number[i]<<" "<<start_address[i]<<" "<<size[i]<<endl;
         }
@@ -290,16 +292,19 @@ void* mem_init(){
     }
 
     cout<<"空闲区如下"<<endl;
+    cout<<"序号 起始地址 大小"<<endl;
     for(int i=0;i<blank_table->number.size();i++){
         cout<<blank_table->number[i]<<" "<<blank_table->start_address[i]<<" "<<blank_table->size[i]<<endl;
     }
 
     cout<<"忙碌区如下"<<endl;
+    cout<<"序号 起始地址 大小"<<endl;
     for(int i=0;i<busy_table->number.size();i++){
         cout<<busy_table->number[i]<<" "<<busy_table->start_address[i]<<" "<<busy_table->size[i]<<endl;
     }
 
     cout<<"所有区如下"<<endl;
+    cout<<"序号 起始地址 大小"<<endl;
     for(int i=0;i<all_table->number.size();i++){
         cout<<all_table->number[i]<<" "<<all_table->start_address[i]<<" "<<all_table->size[i]<<" "<<all_table->status[i]<<endl;
     }
@@ -495,6 +500,7 @@ void manage(int sim_step, int type){
 
             } while (mm_request_WF(n) != -1);
         }
+        cout<<"在申请大小为"<<n<<"的空间时失败，系统将归还某一已分配的空间至空闲表中。。"<<endl;
 
        // blank_table->display();
         mm_release(blank_table->size.size()-1);
@@ -509,13 +515,28 @@ int main() {
     all_table = new AllMMTable();
 
     srand((unsigned)time(NULL));
+    cout<<"在系统未随机初始化前，空闲区大小为"<<MMSIZE<<endl;
+    cout<<"系统正在初始化中。。。"<<endl;
 
     mem_init();
     blank_table->display();
 
-    cout<<"----------------------------"<<endl;
-    // 0为FF 1为BF 2为WF
-    manage(5, 0);
+    cout<<"---------------------------------------"<<endl;
+    cout<<"| 系统自动随机初始化成功。              |"<<endl;
+    cout<<"| 空闲表及辅助表已生成。                |"<<endl;
+    cout<<"| 请输入要选择的算法                    |"<<endl;
+    cout<<"| 0为FF 1为BF 2为WF                    |"<<endl;
+    cout<<"| 输入后，系统将自动进行随机分配         |"<<endl;
+    cout<<"|                                      |"<<endl;
+    cout<<"|                by SuperSaiyan Goku   |"<<endl;
+    cout<<"---------------------------------------"<<endl;
+    int choose = 0;
+    cin>>choose;
+    if(choose<0||choose>3){
+        cout<<"非法输入！"<<endl;
+    }
+    else
+        manage(5, choose);
 
     return 0;
 }
