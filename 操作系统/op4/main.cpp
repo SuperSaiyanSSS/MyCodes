@@ -4,12 +4,6 @@
 
 using namespace std;
 
-//int* Available;
-//int** Max;
-//int** Allocation;
-//int** Need;
-//bool* Finish;
-//int* Work;
 int Max[PROCESS][RESOURCE] = {
         {7,5,3},
         {3,2,2},
@@ -34,65 +28,27 @@ int Work[RESOURCE];
 bool Finish[PROCESS] = {false, false, false};
 
 int Available[RESOURCE] = {3,3,2};
+
 void init(){
     for(int i=0;i<PROCESS;i++){
         for(int j=0;j<RESOURCE;j++){
             Need[i][j] = Max[i][j] - Allocation[i][j];
         }
     }
-
-    //int Available[RESOURCE];
-//    Available = new int[RESOURCE];
-//    for(int i=0;i<PROCESS;i++){
-//        Max[i] = new int[RESOURCE];
-//    }
-//    for(int i=0;i<PROCESS;i++){
-//        Allocation[i] = new int[RESOURCE];
-//    }
-//    for(int i=0;i<PROCESS;i++){
-//        Need[i] = new int[RESOURCE];
-//    }
-//    Finish = new bool[PROCESS];
-//    Work = new int[RESOURCE];
-//    int Max[PROCESS][RESOURCE] = {{7,5,3},
-//    {3,2,2},
-//    {9,0,2},
-//     {2,2,2},
-//    {4,3,3}
-//    };
-//    int Allocation[PROCESS][RESOURCE] = {
-//            {0,1,0},
-//            {2,0,0},
-//            {3,0,2},
-//            {2,1,1},
-//            {0,0,2}
-//    };
-
-//    Allocation[0] = {0,1,0};
-//    Allocation[1] = {2,0,0};
-//    Allocation[2] = {3,0,2};
-//    Allocation[3] = {2,1,1};
-//    Allocation[4] = {0,0,2};
-    //int Need[PROCESS][RESOURCE];
-
-//    for(int i=0;i<PROCESS;i++){
-//        for(int j=0;j<RESOURCE;j++){
-//            Need[i][j] = Max[i][j] - Allocation[i][j];
-//        }
-//    }
-
-   // int Available[PROCESS][RESOURCE] = {3,3,2};
-//    Available[0] = 3;
-//    Available[1] = 3;
-//    Available[2] = 2;
 }
 
 int test_safe(){
 
+    for(int i=0;i<PROCESS;i++){
+        Finish[i] = false;
+    }
+
+    cout<<"现在拥有的资源1 2 3的数量分别为"<<endl;
     for(int i=0;i<RESOURCE;i++){
         Work[i] = Available[i];
-        cout<<Work[i]<<endl;
+        cout<<Work[i]<<" ";
     }
+    cout<<endl;
 
     while(1) {
         bool ok_flag = false;
@@ -110,7 +66,7 @@ int test_safe(){
                 }
                 if (ok_flag) {
                     target_process = i;
-                    cout<<"�������еĽ���Ϊ    "<<i<<endl;
+                    cout<<"现在运行的进程为    "<<i<<endl;
                     break;
                 }
             }
@@ -134,23 +90,19 @@ int test_safe(){
 
 }
 
-void request(int target_process, int *need_resource_list, int list_size){
+void request(int target_process, int *need_resource_list){
 
-    if(list_size!=RESOURCE){
-        cout<<"����Ƿ���"<<endl;
-        return;
-    }
     bool can_flag = true;
-    for(int i=0;i<list_size;i++){
+    for(int i=0;i<RESOURCE;i++){
         if(need_resource_list[i]>Need[target_process][i]||need_resource_list[i]>Available[i]){
             can_flag = false;
         }
     }
     if(!can_flag){
-        cout<<"����ȫ��"<<endl;
+        cout<<"不安全！"<<endl;
         return;
     }
-    for(int j=0;j<list_size;j++){
+    for(int j=0;j<RESOURCE;j++){
         Available[j] -= need_resource_list[j];
         Allocation[target_process][j] += need_resource_list[j];
         Need[target_process][j] -= need_resource_list[j];
@@ -158,27 +110,84 @@ void request(int target_process, int *need_resource_list, int list_size){
 
     int safe_flag = test_safe();
     if(safe_flag){
-        cout<<"������Ҫ�ĳɹ�12"<<endl;
+        cout<<"申请资源成功！"<<endl;
     }
     else{
-        cout<<"������˼"<<endl;
+        cout<<"申请资源失败，原因是将进入不安全状态"<<endl;
+        for(int j=0;j<RESOURCE;j++){
+            Available[j] += need_resource_list[j];
+            Allocation[target_process][j] -= need_resource_list[j];
+            Need[target_process][j] += need_resource_list[j];
+        }
     }
+
+
     return;
 }
 
+void display(){
+    cout<<"当前最大需求矩阵 Max 为"<<endl;
+    for(int i=0;i<PROCESS;i++){
+        for(int j=0;j<RESOURCE;j++){
+            cout<<Max[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"当可利用资源向量 Available 为"<<endl;
+    for(int j=0;j<RESOURCE;j++){
+        cout<<Available[j]<<" ";
+    }
+    cout<<endl;
+    cout<<"当前分配矩阵 Allocation 为"<<endl;
+    for(int i=0;i<PROCESS;i++){
+        for(int j=0;j<RESOURCE;j++){
+            cout<<Allocation[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"当前需求矩阵 Need 为"<<endl;
+    for(int i=0;i<PROCESS;i++){
+        for(int j=0;j<RESOURCE;j++){
+            cout<<Need[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+}
+
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "=======银行家算法========" << std::endl;
     init();
-   // test_safe();
-    int target_process = 1;
-    int need_resource_list[RESOURCE] = {1,0,2};
-    request(target_process, need_resource_list, RESOURCE);
+    display();
+    cout<<"检查当前状态是否安全。。"<<endl;
+    test_safe();
+    int target_process;
+    int need_resource_list[RESOURCE];
+
     target_process = 0;
+    while(1) {
 
-    need_resource_list[0] = 0;
-    need_resource_list[1] = 2;
-    need_resource_list[2] = 0;
+        display();
 
-    request(target_process, need_resource_list, RESOURCE);
+        cout << "请输入命令 格式为 request 0 0 2 0" << endl;
+        cout << "示例为进程0请求资源1,2,3的数量分别为0,2,0" << endl;
+        cout <<"如结束，则输入break"<<endl;
+
+        string request2;
+        cin >> request2;
+        if (request2 == "break"){
+            break;
+        }
+        if (request2 != "request") {
+            cout << "非法输入！" << endl;
+        }
+        cin >> target_process;
+        if (target_process < 0 || target_process >= PROCESS) {
+            cout << "进程超出范围，范围为0到" << PROCESS << endl;
+        }
+        for (int i = 0; i < RESOURCE; i++) {
+            cin >> need_resource_list[i];
+        }
+        request(target_process, need_resource_list);
+    }
     return 0;
 }

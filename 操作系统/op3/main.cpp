@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
-#define PAGETABLENUM 20
-#define PHYSICALBLOCKNUM 3
+#include <ctime>
+#include <cstdlib>
 
 using namespace std;
 class PageTable;
@@ -13,6 +13,9 @@ int oldest_point;
 vector<int> RecordQueue;
 int success_number;
 int fail_number;
+
+int PAGETABLENUM;
+int PHYSICALBLOCKNUM;
 
 class PageTable{
 public:
@@ -57,29 +60,33 @@ void init(){
 //    PageUsedSequence.push_back(2);
 //    PageUsedSequence.push_back(6);
 
-
-
-    PageUsedSequence.push_back(7);
-    PageUsedSequence.push_back(0);
-    PageUsedSequence.push_back(1);
-    PageUsedSequence.push_back(2);
-    PageUsedSequence.push_back(0);
-    PageUsedSequence.push_back(3);
-    PageUsedSequence.push_back(0);
-    PageUsedSequence.push_back(4);
-    PageUsedSequence.push_back(2);
-    PageUsedSequence.push_back(3);
-    PageUsedSequence.push_back(0);
-    PageUsedSequence.push_back(3);
-    PageUsedSequence.push_back(2);
-    PageUsedSequence.push_back(1);
-    PageUsedSequence.push_back(2);
-    PageUsedSequence.push_back(0);
-    PageUsedSequence.push_back(1);
-    PageUsedSequence.push_back(7);
-    PageUsedSequence.push_back(0);
-    PageUsedSequence.push_back(0);
+    // 随机设定进程运行的页面次序
+    int count = rand()%50+10;
+    for(int i=0;i<count;i++){
+        PageUsedSequence.push_back(rand()%PAGETABLENUM);
+    }
+//    PageUsedSequence.push_back(7);
+//    PageUsedSequence.push_back(0);
+//    PageUsedSequence.push_back(1);
+//    PageUsedSequence.push_back(2);
+//    PageUsedSequence.push_back(0);
+//    PageUsedSequence.push_back(3);
+//    PageUsedSequence.push_back(0);
+//    PageUsedSequence.push_back(4);
+//    PageUsedSequence.push_back(2);
+//    PageUsedSequence.push_back(3);
+//    PageUsedSequence.push_back(0);
+//    PageUsedSequence.push_back(3);
+//    PageUsedSequence.push_back(2);
+//    PageUsedSequence.push_back(1);
+//    PageUsedSequence.push_back(2);
+//    PageUsedSequence.push_back(0);
+//    PageUsedSequence.push_back(1);
+//    PageUsedSequence.push_back(7);
+//    PageUsedSequence.push_back(0);
+//    PageUsedSequence.push_back(0);
 }
+
 
 void display_stack(){
     cout<<"====="<<endl;
@@ -88,6 +95,7 @@ void display_stack(){
     }
     cout<<"====="<<endl;
 }
+
 
 void LRU(){
     for(vector<int>::iterator iter = PageUsedSequence.begin();iter!=PageUsedSequence.end(); iter++){
@@ -153,6 +161,7 @@ void LRU(){
 
     }
 }
+
 
 void FIFO(){
     for(vector<int>::iterator iter = PageUsedSequence.begin();iter!=PageUsedSequence.end(); iter++){
@@ -228,10 +237,37 @@ void FIFO(){
 
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    init();
-    FIFO();
-    double f = (double)fail_number/((double)success_number+(double)fail_number);
-    cout<<"缺页率为 "<<f<<endl;
+    std::cout << "===虚拟存储器管理之页面置换算法===" << std::endl;
+    srand((unsigned)time(NULL));
+
+    cout<<"请输入进程页表的数目"<<endl;
+    cin>>PAGETABLENUM;
+    cout<<"请输入内存的物理块数"<<endl;
+    cin>>PHYSICALBLOCKNUM;
+    while(1) {
+        init();
+        cout<<"请输入要选择的页面置换算法"<<endl;
+        cout<<"(0)程序结束"<<endl;
+        cout<<"(1)先进先出页面置换算法"<<endl;
+        cout<<"(2)最近最久未使用页面置换算法"<<endl;
+        int choose;
+        cin>>choose;
+        if(choose==1){
+            FIFO();
+        }
+        else if(choose==2){
+            LRU();
+        }
+        else if(choose==0){
+            cout<<"程序结束！"<<endl;
+            break;
+        }
+        else{
+            cout<<"非法输入！"<<endl;
+            continue;
+        }
+        double f = (double) fail_number / ((double) success_number + (double) fail_number);
+        cout << "缺页率为 " << f << endl;
+    }
     return 0;
 }
