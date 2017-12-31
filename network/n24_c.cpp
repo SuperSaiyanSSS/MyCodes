@@ -67,9 +67,10 @@ int main()
 			break;
 		}
 		input_string = string(sendStringArray);
-		// 加入代表字符串终结的符号
-		sendStringArray[input_string.length()] = '\0';
-		iResult = send(s, sendStringArray, input_string.length() + 1, 0);
+		// 加入代表字符串终结的符号和换行符
+		sendStringArray[input_string.length()] = '\n';
+		sendStringArray[input_string.length()+1] = '\0';
+		iResult = send(s, sendStringArray, input_string.length() + 2, 0);
 		if (iResult == SOCKET_ERROR) {
 			cout << "发送失败" << endl;
 			WSACleanup();
@@ -77,15 +78,26 @@ int main()
 			return -1;
 		}
 		iResult = recv(s, recvline, DEFAULT_LINE, 0);
-		cout << recvline << endl;
-		if (iResult <= 0) {
-			cout << "接收数据失败！错误码 " << WSAGetLastError() << endl;
-			WSACleanup();
-			getchar();
-			return -1;
-		}
-		else {
-			output_string = string(recvline);
+		while (iResult > 0)
+		{
+			int i;
+			for (i = 0; i < iResult; ++i)
+			{
+				if (recvline[i] == '\n')
+				{
+					break;
+				}
+			}
+			if (i == iResult)
+			{
+				output_string += string(recvline, iResult);
+				iResult = recv(s, recvline, DEFAULT_LINE, 0);
+			}
+			else
+			{
+				output_string += string(recvline, iResult);
+				break;
+			}
 		}
 		cout << "echo: " << output_string << endl;
 		output_string = "";

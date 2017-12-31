@@ -19,15 +19,60 @@ using namespace std;
 #define TARGET_PORT 751
 #define MAXSIZE 100
 #define DEFAULT_LINE 100
+int recvn_len;
+DWORD WINAPI ThreadProc(LPVOID clientSocket_p)
+{
+	char recvbuf[DEFAULT_LINE];
+
+	//类型转换
+	SOCKET* clientSocket_p2 = (SOCKET*)clientSocket_p;
+	SOCKET clientSocket = *clientSocket_p2;
+	int iResult;
+	while (1) {
+
+		if (clientSocket != SOCKET_ERROR) {
+			cout << "连接成功" << endl;
+		}
+		do {
+			memset(recvbuf, 0, sizeof(recvbuf));
+			iResult = recv(clientSocket, recvbuf, DEFAULT_LINE, 0);
+			if (iResult > 0) {
+				cout << "接收到 " << recvbuf << endl;
+				iResult = send(clientSocket, recvbuf, DEFAULT_LINE, 0);
+				if (iResult == SOCKET_ERROR) {
+					cout << "发送失败" << endl;
+					closesocket(clientSocket);
+					WSACleanup();
+					getchar();
+					return -1;
+				}
+				cout << "已发送" << endl;
+			}
+			else if (iResult == 0) {
+				cout << "即将关闭连接。。。" << endl;
+
+				closesocket(clientSocket);
+				return -1;
+			}
+			else {
+				cout << "接收时出现错误，代码" << WSAGetLastError() << endl;
+				closesocket(clientSocket);
+
+				return -1;
+			}
+		} while (iResult > 0);
+	}
+	closesocket(clientSocket);
+	WSACleanup();
+	return 0;
+}
+
 
 int main()
 {
 	WSADATA data;
 	WORD w = MAKEWORD(2, 2);                   //定义版本号码  
 
-	int recvn_len;
-	cout << "请输入定长" << endl;
-	cin >> recvn_len;
 
 	int iResult;
 	iResult = WSAStartup(MAKEWORD(2, 2), &data);
@@ -39,7 +84,7 @@ int main()
 	}
 
 	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); ;     //声明并初始化两个套接字
-	SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); ;
+
 	SOCKADDR_IN addr;	//服务器地址
 
 	addr.sin_family = AF_INET;                //初始化地址结构  
@@ -66,63 +111,22 @@ int main()
 	//定义接受缓冲区，默认大小
 	char recvbuf[DEFAULT_LINE];
 	int len_of_recvbuf = DEFAULT_LINE;
-	//统计相对于固定长度剩余多少字节尚未被接收
-	int cnt;
-	cnt = recvn_len;
-	//存储几次接收的小于固定长度的字符串
-	string save_string;
+
 
 	while (1) {
 		cout << "正在等待客户端连接。。。" << endl;
+		SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); ;
 		clientSocket = accept(listenSocket, NULL, NULL);
 		if (clientSocket != SOCKET_ERROR) {
 			cout << "连接成功" << endl;
 		}
-		do {
-			iResult = recv(clientSocket, recvbuf, recvn_len, 0);
-			if (iResult > 0) {
-				while (1) {
-					cout << "接收到 " << recvbuf << endl;
-					cnt -= string(recvbuf).length();
-					cout << "cnt " << cnt << endl;
-					save_string += string(recvbuf);
-					if (cnt <= 0) {
-						break;
-					}
-					iResult = recv(clientSocket, recvbuf, recvn_len, 0);
-					if (iResult == SOCKET_ERROR) {
-						cout << "接收时意外错误" << endl;
-						break;
-					}
-
-				}
-				save_string.copy(recvbuf, save_string.length(), 0);
-				iResult = send(clientSocket, recvbuf, recvn_len, 0);
-				if (iResult == SOCKET_ERROR) {
-					cout << "发送失败" << endl;
-					closesocket(clientSocket);
-					WSACleanup();
-					getchar();
-					return -1;
-				}
-				cout << "已发送" << endl;
-			}
-			else if (iResult == 0) {
-				cout << "即将关闭连接。。。" << endl;
-			}
-			else {
-				cout << "接收时出现错误，代码" << WSAGetLastError() << endl;
-				closesocket(clientSocket);
-				WSACleanup();
-				getchar();
-				return -1;
-			}
-			cnt = recvn_len;
-		} while (iResult > 0);
+		//向线程传递clientSocket地址这个参数
+		HANDLE handle = CreateThread(NULL, 0, ThreadProc, &clientSocket, 0, NULL);
+	
 	}
 
 	cout << "结束" << endl;
-	closesocket(clientSocket);
+	closesocket(listenSocket);
 	WSACleanup();
 	getchar();
 
