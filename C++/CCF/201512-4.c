@@ -11,7 +11,6 @@ typedef struct linkNode{
 int arrayforprint[1000];
 int arrayforprint_length;
 
-
 linkNode points[1000];
 int visited[1000][1000]; 
 
@@ -70,7 +69,7 @@ void pushNewNode(int p1, int p2){
 
 }
 
-//�ж��Ƿ�Ϊ��ͨͼ
+//判断是否为连通图
 int n_nodes[1000];
 
 int find(int number){
@@ -153,18 +152,18 @@ int main() {
 	}
 
 
-// һ��Ҫ��malloc ��������next��ΪNULL��������֪��ʲôԭ����next��Ȼ��ָ����ĳ���ص㣬���ӵ��Ǿ�Ȼ����id���ԡ������˹� 
+// 一定要在malloc 点后把他的next设为NULL。。否则不知道什么原因导致next竟然还指向了某个地点，更坑的是竟然还有id属性。。日了狗 
 //printf("now is %d %d\n", 1, points[1].next->id);
 
 	
-	//�ж��Ƿ�����ŷ��·�Ķ��� ��ÿ��������Ϊż���������ҽ�������������Ϊ������������һ����Ϊ��ڵ� 
+	//判断是否满足欧拉路的定义 即每个点出入度为偶数，或有且仅有两个点出入度为奇数，且其中一个点为入口点 
 	int count_ji = 0;
 	int count = 0;
 	int first_ji = 0; 
 	int second_ji = 0;
 	for(i=1;i<n+1;i++){
 		linkNode* p = points[i].next;
-		//���ã�p  ��������ĳ�!p�ͳ����ˡ���C�������汾̫�� ��Ϊ���������� 
+		//慎用！p  这里如果改成!p就出错了。。C编译器版本太老 认为不满足条件 
 		while(p!=NULL){
 			count++;
 			p = p->next;
